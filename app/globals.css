@@ -60,3 +60,17 @@ a {
     color-scheme: dark;
   }
 }
+
+
+/* Quiz v1 -- UX and Screen Transition */
+@keyframes remiSlideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.remi-screen { animation: remiSlideIn 180ms ease-out; }
+
+@keyframes remiFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.remi-summary { animation: remiFadeIn 220ms ease-out; }

@@ -1,15 +1,72 @@
-import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 
-/*== STEP 1 ===============================================================
-The section below creates a Todo database table with a "content" field. Try
-adding a new "isDone" field as a boolean. The authorization rule below
-specifies that any user authenticated via an API key can "create", "read",
-"update", and "delete" any "Todo" records.
-=========================================================================*/
 const schema = a.schema({
-  Todo: a
+  QuizSession: a
     .model({
-      content: a.string(),
+      status: a.enum(["ACTIVE", "COMPLETED", "ABANDONED"]),
+      tier: a.enum(["A", "B", "C"]),
+      currentScreenId: a.string(),
+      startedAt: a.datetime(),
+      completedAt: a.datetime(),
+
+      // attribution + light client metadata
+      utmSource: a.string(),
+      utmCampaign: a.string(),
+      utmMedium: a.string(),
+      referrer: a.string(),
+      userAgent: a.string(),
+      locale: a.string(),
+      timezone: a.string(),
+
+      // relations
+      responses: a.hasMany("QuizResponse", "sessionId"),
+      lead: a.hasOne("WaitlistLead", "sessionId"),
+      events: a.hasMany("EventLog", "sessionId"),
+    })
+    .authorization((allow) => [
+      // v1 anonymous: public access (tighten later with Cognito + owner auth)
+      allow.publicApiKey(),
+    ]),
+
+  QuizResponse: a
+    .model({
+      sessionId: a.id(),
+      screenId: a.string(), // e.g. "S2"
+      questionKey: a.string(), // e.g. "cardCountBand"
+      answerType: a.enum(["single", "multi", "text", "number"]),
+      answer: a.string(), // JSON.stringify(value)
+      answeredAt: a.datetime(),
+
+      session: a.belongsTo("QuizSession", "sessionId"),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
+
+  WaitlistLead: a
+    .model({
+      sessionId: a.id(),
+      email: a.email().required(),
+      phone: a.phone(),
+
+      emailOptIn: a.boolean().default(false),
+      smsOptIn: a.boolean().default(false),
+      betaOptIn: a.boolean().default(false),
+
+      sourceTier: a.enum(["A", "B", "C"]),
+      createdAt: a.datetime(),
+
+      session: a.belongsTo("QuizSession", "sessionId"),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
+
+  EventLog: a
+    .model({
+      sessionId: a.id(),
+      eventName: a.string(), // START, SCREEN_VIEW, ANSWER_SUBMIT, TIER_COMPUTED, LEAD_SUBMIT, etc.
+      screenId: a.string(),
+      properties: a.string(), // JSON.stringify({...})
+      createdAt: a.datetime(),
+
+      session: a.belongsTo("QuizSession", "sessionId"),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 });
@@ -20,37 +77,6 @@ export const data = defineData({
   schema,
   authorizationModes: {
     defaultAuthorizationMode: "apiKey",
-    apiKeyAuthorizationMode: {
-      expiresInDays: 30,
-    },
+    apiKeyAuthorizationMode: { expiresInDays: 30 },
   },
 });
-
-/*== STEP 2 ===============================================================
-Go to your frontend source code. From your client-side code, generate a
-Data client to make CRUDL requests to your table. (THIS SNIPPET WILL ONLY
-WORK IN THE FRONTEND CODE FILE.)
-
-Using JavaScript or Next.js React Server Components, Middleware, Server 
-Actions or Pages Router? Review how to generate Data clients for those use
-cases: https://docs.amplify.aws/gen2/build-a-backend/data/connect-to-API/
-=========================================================================*/
-
-/*
-"use client"
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
-
-const client = generateClient<Schema>() // use this Data client for CRUDL requests
-*/
-
-/*== STEP 3 ===============================================================
-Fetch records from the database and use them in your frontend component.
-(THIS SNIPPET WILL ONLY WORK IN THE FRONTEND CODE FILE.)
-=========================================================================*/
-
-/* For example, in a React component, you can use this snippet in your
-  function's RETURN statement */
-// const { data: todos } = await client.models.Todo.list()
-
-// return <ul>{todos.map(todo => <li key={todo.id}>{todo.content}</li>)}</ul>
