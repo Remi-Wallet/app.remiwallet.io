@@ -7,6 +7,8 @@ export type QuizOption = {
   icon?: string; // optional emoji/icon
 };
 
+export type Tier = "A" | "B" | "C";
+
 export type QuizScreen =
   | {
       step: number;

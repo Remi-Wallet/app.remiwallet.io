@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { Grid, Card, CardActionArea, CardContent, Typography } from "@mui/material";
-import type { Option } from "@/lib/quiz/screens";
+import type { QuizOption } from "@/lib/quiz/screens";
 
 export function OptionGrid(props: {
-  options: Option[];
+  options: QuizOption[];
   selected?: string | string[] | null;
   onSelect: (value: string) => void;
   multi?: boolean;
@@ -34,9 +34,9 @@ export function OptionGrid(props: {
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   {o.label}
                 </Typography>
-                {o.helper ? (
+                {o.helperText ? (
                   <Typography variant="body2" color="text.secondary">
-                    {o.helper}
+                    {o.helperText}
                   </Typography>
                 ) : null}
                 {multi ? (

@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { Stack, ButtonBase, Typography, Box } from "@mui/material";
-import type { Option } from "@/lib/quiz/screens";
+import type { QuizOption } from "@/lib/quiz/screens";
 
 export function OptionList(props: {
-  options: Option[];
+  options: QuizOption[];
   selected?: string | null;
   onSelect: (value: string) => void;
 }) {
@@ -47,9 +47,9 @@ export function OptionList(props: {
                 {o.label}
               </Typography>
 
-              {o.helper ? (
+              {o.helperText ? (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                  {o.helper}
+                  {o.helperText}
                 </Typography>
               ) : null}
             </Box>
