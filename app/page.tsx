@@ -21,7 +21,7 @@ const onStart = () => {
     <QuizShell
       title={
         <>
-          The average American loses{" "}
+          You could be losing {" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 800, color: "primary.main" }}>
             thousands
           </Box>{" "}
