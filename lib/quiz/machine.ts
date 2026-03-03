@@ -1,11 +1,7 @@
-import type { Tier } from "./screens";
+import type { Tier } from "./types";
 import { getOrCreateSessionId, getStoredQuiz, setStoredQuiz } from "./storage";
 
-export type QuizState = {
-  sessionId: string;
-  answers: Record<string, any>;
-  tier?: Tier;
-};
+import type { QuizState } from "./types";
 
 export function loadQuizState(): QuizState {
   const stored = getStoredQuiz();

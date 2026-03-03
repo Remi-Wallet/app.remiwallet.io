@@ -1,13 +1,6 @@
 // lib/quiz/screens.ts
 
-export type QuizOption = {
-  label: string;
-  value: string;
-  helperText?: string;
-  icon?: string; // optional emoji/icon
-};
-
-export type Tier = "A" | "B" | "C";
+import type { QuizOption } from "./types";
 
 export type QuizScreen =
   | {

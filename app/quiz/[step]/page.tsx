@@ -13,7 +13,7 @@ import { SummaryBars } from "@/components/quiz/SummaryBars";
 
 import { screenByStep } from "@/lib/quiz/screens";
 import { track } from "@/lib/analytics/events";
-import type { Answers, Tier } from "@/lib/quiz/storage";
+import type { Answers, Tier } from "@/lib/quiz/types";
 import { loadQuizState, saveAnswer, persistTier } from "@/lib/quiz/storage";
 
 // ---- scoring (your rubric) ----

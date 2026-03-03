@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Stack, ButtonBase, Typography, Box } from "@mui/material";
-import type { QuizOption } from "@/lib/quiz/screens";
+import type { QuizOption } from "@/lib/quiz/types";
 
 export function OptionList(props: {
   options: QuizOption[];

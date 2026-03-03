@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Grid, Card, CardActionArea, CardContent, Typography } from "@mui/material";
-import type { QuizOption } from "@/lib/quiz/screens";
+import type { QuizOption } from "@/lib/quiz/types";
 
 export function OptionGrid(props: {
   options: QuizOption[];
