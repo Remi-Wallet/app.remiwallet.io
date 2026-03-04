@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import Link from "next/link";
 
 import { QuizShell } from "@/components/quiz/QuizShell";
 import { OptionList } from "@/components/quiz/OptionList";
@@ -12,64 +12,65 @@ import { OptionGrid } from "@/components/quiz/OptionGrid";
 import { SummaryBars } from "@/components/quiz/SummaryBars";
 
 import { screenByStep } from "@/lib/quiz/screens";
-import { track } from "@/lib/analytics/events";
-import type { Answers, Tier } from "@/lib/quiz/types";
 import { loadQuizState, saveAnswer, persistTier } from "@/lib/quiz/storage";
+import type { Answers, Tier } from "@/lib/quiz/types";
+import { nextAfterSummary } from "@/lib/quiz/routing";
+import { computeTierScore as computeScore, computeTierFromAnswers as computeTier } from "@/lib/quiz/scoring";
 
-// ---- scoring (your rubric) ----
-function computeScore(answers: Answers) {
-  const cards = String(answers.q_cards ?? "");
-  const spend = String(answers.q_spend ?? "");
-  const feel = String(answers.q_feel ?? "");
-
-  const cardPoints: Record<string, number> = { "1": 0, "2-3": 2, "4-6": 4, "7+": 5 };
-  const spendPoints: Record<string, number> = { under_1k: 0, "1_3k": 2, "3_7k": 4, "7k_plus": 5 };
-  const feelPoints: Record<string, number> = {
-    handled: 3,
-    try_best: 2,
-    confusing: 1,
-    leaving_value: 2,
-    dont_think: 0,
-  };
-
-  return (cardPoints[cards] ?? 0) + (spendPoints[spend] ?? 0) + (feelPoints[feel] ?? 0);
+function vibrate(pattern: number | number[]) {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      // @ts-ignore
+      navigator.vibrate(pattern);
+    }
+  } catch { }
 }
 
-function computeTier(answers: Answers): Tier {
-  const score = computeScore(answers);
-  if (score >= 9) return "A";
-  if (score >= 6) return "B";
-  return "C";
+function nextRouteForStep(step: number) {
+  if (step === 4) return "/quiz/5";
+  if (step === 8) return "/early-access";
+  return `/quiz/${step + 1}`;
 }
 
-function nextAfterSummary(tier: Tier) {
-  return tier === "C" ? "/early-access" : "/quiz/6";
+function toProgress(screen: any): { current: number; total: number } | undefined {
+  if (!screen) return undefined;
+
+  // Older style: progress object already present
+  if (
+    screen.progress &&
+    typeof screen.progress.current === "number" &&
+    typeof screen.progress.total === "number"
+  ) {
+    return screen.progress;
+  }
+
+  // Newer style: showProgress + progressCurrent/Total
+  if (
+    screen.showProgress &&
+    typeof screen.progressCurrent === "number" &&
+    typeof screen.progressTotal === "number"
+  ) {
+    return { current: screen.progressCurrent, total: screen.progressTotal };
+  }
+
+  return undefined;
 }
 
 export default function QuizStepPage() {
   const router = useRouter();
   const params = useParams<{ step?: string }>();
-  const step = Number(params.step || "0");
+  const stepNum = Number(params.step || "0");
 
-  // guard bad route
   useEffect(() => {
-    if (!Number.isFinite(step) || step <= 0) router.replace("/");
-  }, [step, router]);
+    if (!Number.isFinite(stepNum) || stepNum <= 0) router.replace("/");
+  }, [stepNum, router]);
 
-  const screen = useMemo(() => (Number.isFinite(step) ? screenByStep(step) : undefined), [step]);
+  const screen = useMemo(() => (Number.isFinite(stepNum) ? screenByStep(stepNum) : undefined), [stepNum]);
   const [state, setState] = useState(() => loadQuizState());
 
-  // Keep state in sync with localStorage (basic; fine for v1)
   useEffect(() => {
     setState(loadQuizState());
-  }, [step]);
-
-  // step view logging
-  useEffect(() => {
-    if (!screen) return;
-    track("step_view", { step, screenType: screen.type, questionKey: (screen as any).questionKey });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, !!screen]);
+  }, [stepNum]);
 
   useEffect(() => {
     if (!screen) router.replace("/");
@@ -78,27 +79,19 @@ export default function QuizStepPage() {
   if (!screen) return null;
 
   const questionKey = (screen as any).questionKey as string | undefined;
-  const currentValue = questionKey ? state.answers[questionKey] : undefined;
+  const currentValue = questionKey ? (state.answers as any)?.[questionKey] : undefined;
 
-  const vibrate = (pattern: number | number[]) => {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      // @ts-ignore
-      navigator.vibrate(pattern);
-    }
-  };
-
-  // --- summary ---
+  // SUMMARY
   if (screen.type === "summary") {
-    const tier = state.tier ?? computeTier(state.answers);
-    const score = computeScore(state.answers);
+    const answers = state.answers as Answers;
+    const score = computeScore(answers);
+    const tier: Tier = state.tier ?? computeTier(answers);
 
     useEffect(() => {
       if (!state.tier) {
         const next = persistTier(tier);
         setState(next);
-        track("tier_assigned", { tier, score });
       }
-      track("quiz_complete", { segment: "segment1", tier, score });
       vibrate([20, 30, 20]);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -106,7 +99,7 @@ export default function QuizStepPage() {
     const copy = getSummaryCopy(tier);
 
     return (
-      <QuizShell title={copy.title} subtitle={copy.subtitle} showBack>
+      <QuizShell variant="quiz" title={copy.title} subtitle={copy.subtitle}>
         <Box className="remi-summary">
           <Stack spacing={2}>
             <SummaryBars rows={copy.bars} caption="Most people have an opportunity gap — Remi helps close it." />
@@ -135,14 +128,12 @@ export default function QuizStepPage() {
               variant="contained"
               size="large"
               onClick={() => {
-                track("quiz_complete", { segment: "segment1", tier, score, action: tier === "C" ? "join_early_access" : "continue" });
                 router.push(nextAfterSummary(tier));
               }}
             >
               {tier === "C" ? "Join early access" : "Optimize further"}
             </Button>
 
-            {/* Tier A/B only: subtle skip link */}
             {tier !== "C" ? (
               <Box sx={{ textAlign: "center" }}>
                 <Typography
@@ -157,7 +148,6 @@ export default function QuizStepPage() {
                     textDecoration: "none",
                     "&:hover": { textDecoration: "underline", opacity: 0.75 },
                   }}
-                  onClick={() => track("summary_skip_to_beta", { tier, score })}
                 >
                   Skip for now — join beta
                 </Typography>
@@ -167,40 +157,33 @@ export default function QuizStepPage() {
             <Button variant="text" onClick={() => router.push("/")}>
               Restart
             </Button>
+
+            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.6, textAlign: "center" }}>
+              Score: {score} • Tier {tier}
+            </Typography>
           </Stack>
         </Box>
       </QuizShell>
     );
   }
 
-  // --- single select ---
+  // QUESTIONS
+  const progress = toProgress(screen);
+
   const onSingleSelect = (value: string) => {
     if (screen.type !== "single" || !questionKey) return;
 
+    vibrate(10);
     const next = saveAnswer(questionKey, value);
     setState(next);
 
-    track("answer_selected", { step, questionKey, value, mode: "single" });
-    vibrate(10);
-
     if ((screen as any).autoAdvance) {
       window.setTimeout(() => {
-        if (step === 4) {
-          const t = computeTier(next.answers);
-          const s = computeScore(next.answers);
-          const next2 = persistTier(t);
-          setState(next2);
-          track("tier_assigned", { tier: t, score: s });
-          track("quiz_complete", { segment: "segment1", tier: t, score: s });
-          router.push("/quiz/5");
-          return;
-        }
-        router.push(`/quiz/${step + 1}`);
-      }, 300);
+        router.push(nextRouteForStep(stepNum));
+      }, 280);
     }
   };
 
-  // --- multi select ---
   const onMultiToggle = (value: string) => {
     if (screen.type !== "multi" || !questionKey) return;
 
@@ -211,24 +194,17 @@ export default function QuizStepPage() {
     const maxSelect = (screen as any).maxSelect as number | undefined;
     if (maxSelect && nextVals.length > maxSelect) return;
 
+    vibrate(has ? 8 : 12);
     const next = saveAnswer(questionKey, nextVals);
     setState(next);
-
-    track("answer_selected", { step, questionKey, value, selectedCount: nextVals.length, mode: "multi" });
-    vibrate(8);
   };
 
   const onContinueMulti = () => {
-    if (screen.type !== "multi") return;
-    const selectedCount = Array.isArray(currentValue) ? currentValue.length : 0;
-    track("multi_continue", { step, questionKey, selectedCount });
-
-    if (step === 8) router.push("/early-access");
-    else router.push(`/quiz/${step + 1}`);
+    router.push(nextRouteForStep(stepNum));
   };
 
   return (
-    <QuizShell title={screen.title} subtitle={screen.subtitle} progress={(screen as any).progress} showBack>
+    <QuizShell variant="quiz" title={screen.title} subtitle={screen.subtitle} progress={progress}>
       <Box className="remi-screen">
         {screen.type === "single" ? (
           <OptionList

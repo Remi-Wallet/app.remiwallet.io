@@ -2,6 +2,11 @@ import * as React from "react";
 import Providers from "./providers";
 import { AppShell } from "@/components/layout/AppShell";
 
+export const metadata = {
+  title: "REMI",
+  description: "The smartest, simpliest way to get more from what you spend.",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
