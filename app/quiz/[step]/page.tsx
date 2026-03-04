@@ -17,6 +17,8 @@ import type { Answers, Tier } from "@/lib/quiz/types";
 import { nextAfterSummary } from "@/lib/quiz/routing";
 import { computeTierScore as computeScore, computeTierFromAnswers as computeTier } from "@/lib/quiz/scoring";
 
+
+
 function vibrate(pattern: number | number[]) {
   try {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -78,8 +80,17 @@ export default function QuizStepPage() {
 
   if (!screen) return null;
 
-  const questionKey = (screen as any).questionKey as string | undefined;
+  const questionKey = ((screen as any).questionKey ?? (screen as any).key) as string | undefined;
+  
+  //JAMESENET -- Add small debug step here but should abstract this later
+  if (process.env.NODE_ENV !== "production") {
+    console.log("DEBUG_STEP", stepNum, "screenKey", questionKey, "type", (screen as any).type);
+  }
+  
   const currentValue = questionKey ? (state.answers as any)?.[questionKey] : undefined;
+  //Allow the user to select nothing on Steps 7 and 
+  const allowEmpty = stepNum === 7 || stepNum === 8;
+  const selectedCount = Array.isArray(currentValue) ? currentValue.length : 0;
 
   // SUMMARY
   if (screen.type === "summary") {
@@ -226,7 +237,7 @@ export default function QuizStepPage() {
             <Button
               variant="contained"
               size="large"
-              disabled={!Array.isArray(currentValue) || currentValue.length === 0}
+              disabled={!allowEmpty && selectedCount === 0}
               onClick={onContinueMulti}
             >
               Continue

@@ -1,34 +1,57 @@
 // lib/quiz/screens.ts
 
 import type { QuizOption } from "./types";
+import { CREDIT_CARDS } from "@/lib/cards/creditCards";
+import { cardsToOptions } from "@/lib/quiz/adapters/cardsToOptions";
+
+// Travel Card List (For Step 7)
+const travelOptions = cardsToOptions({
+  categories: ["Travel"],
+  limit: 6,
+  includeWithoutHelper: true,
+});
+
+const everydayOptions = cardsToOptions({
+  categories: ["Everyday", "Cashback"],
+  limit: 8,
+  includeWithoutHelper: true,
+});
+function takeByCategory(cards: readonly any[], category: string, limit: number) {
+  return cards.filter((c) => c.category === category).slice(0, limit);
+}
+
+function takeByCategories(cards: readonly any[], categories: string[], limit: number) {
+  const set = new Set(categories);
+  return cards.filter((c) => set.has(c.category)).slice(0, limit);
+}
 
 export type QuizScreen =
   | {
-      step: number;
-      type: "single";
-      title: string;
-      subtitle?: string;
-      questionKey: string;
-      options: QuizOption[];
-      autoAdvance?: boolean;
-      progress?: { current: number; total: number };
-    }
+    step: number;
+    type: "single";
+    title: string;
+    subtitle?: string;
+    questionKey: string;
+    options: QuizOption[];
+    autoAdvance?: boolean;
+    progress?: { current: number; total: number };
+  }
   | {
-      step: number;
-      type: "multi";
-      title: string;
-      subtitle?: string;
-      questionKey: string;
-      options: QuizOption[];
-      maxSelect?: number;
-      progress?: { current: number; total: number };
-    }
+    step: number;
+    type: "multi";
+    title: string;
+    subtitle?: string;
+    questionKey: string;
+    options: QuizOption[];
+    maxSelect?: number;
+    progress?: { current: number; total: number };
+  }
   | {
-      step: number;
-      type: "summary";
-      title: string;
-      subtitle?: string;
-    };
+    step: number;
+    type: "summary";
+    title: string;
+    subtitle?: string;
+  };
 
 /**
  * IMPORTANT:
@@ -117,20 +140,12 @@ const SCREENS: Record<number, QuizScreen> = {
   7: {
     step: 7,
     type: "multi",
-    title: "Which premium cards do you have?",
+    title: "Which travel cards do you have?",
     subtitle: "Select all that apply.",
-    questionKey: "q_premium_cards",
+    questionKey: "q_travel_cards",
     maxSelect: 6,
     progress: { current: 2, total: 3 },
-    options: [
-      { label: "Amex Platinum", value: "amex_platinum", helperText: "Premium travel" },
-      { label: "Amex Gold", value: "amex_gold", helperText: "Dining / grocery" },
-      { label: "Chase Sapphire Reserve", value: "csr", helperText: "Premium travel" },
-      { label: "Chase Sapphire Preferred", value: "csp", helperText: "Travel + flexible points" },
-      { label: "Capital One Venture X", value: "venture_x", helperText: "Premium miles" },
-      { label: "Citi Premier", value: "citi_premier", helperText: "Travel points" },
-      { label: "None / Not sure", value: "none_premium", helperText: "We’ll help you" },
-    ],
+    options: travelOptions,
   },
 
   8: {
@@ -141,14 +156,7 @@ const SCREENS: Record<number, QuizScreen> = {
     questionKey: "q_everyday_cards",
     maxSelect: 3,
     progress: { current: 3, total: 3 },
-    options: [
-      { label: "Chase Freedom Unlimited", value: "cfu", helperText: "Everyday cash back" },
-      { label: "Chase Freedom Flex", value: "cff", helperText: "Rotating categories" },
-      { label: "Citi Double Cash", value: "cdc", helperText: "Simple cash back" },
-      { label: "Capital One Savor / SavorOne", value: "savor", helperText: "Dining + grocery" },
-      { label: "Amex Blue Cash Preferred", value: "bcp", helperText: "Grocery cash back" },
-      { label: "Other / Not sure", value: "other", helperText: "We’ll help you" },
-    ],
+    options: everydayOptions,
   },
 };
 
