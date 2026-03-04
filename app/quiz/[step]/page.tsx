@@ -219,8 +219,8 @@ export default function QuizStepPage() {
             <OptionGrid
               options={(screen as any).options}
               selected={Array.isArray(currentValue) ? currentValue : []}
+              maxSelect={(screen as any).maxSelect}
               onSelect={onMultiToggle}
-              multi
             />
 
             <Button

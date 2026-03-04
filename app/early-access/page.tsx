@@ -58,8 +58,7 @@ export default function EarlyAccessPage() {
   };
 
   return (
-    <QuizShell
-      variant="quiz"
+    <QuizShell variant="quiz"
       title={submitted ? "You’re on the list." : "Join early access"}
       subtitle={
         submitted

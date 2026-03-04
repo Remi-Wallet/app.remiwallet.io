@@ -1,136 +1,137 @@
 "use client";
 
 import * as React from "react";
-import { Box, Card, Container, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { ProgressBar } from "@/components/quiz/ProgressBar";
 
-export type QuizShellVariant = "hero" | "quiz" | "summary";
+export type QuizShellVariant = "hero" | "quiz";
 
-export type QuizShellProgress =
-  | {
-      current: number;
-      total: number;
-    }
-  | undefined;
-
-export function QuizShell(props: {
+export type QuizShellProps = {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   children: React.ReactNode;
-  variant?: QuizShellVariant;
-  progress?: QuizShellProgress;
-}) {
-  const { title, subtitle, children, variant = "quiz", progress } = props;
 
+  /**
+   * hero = landing/marketing headline styling
+   * quiz = question-screen styling (Decision A: no-card, “on page” feel)
+   */
+  variant?: QuizShellVariant;
+
+  /**
+   * Optional progress display for quiz screens
+   */
+  progress?: { current: number; total: number };
+
+  /**
+   * Back is optional; you said you may remove it for now.
+   * Keep this here for compatibility if you re-enable later.
+   */
+  showBack?: boolean;
+  onBack?: () => void;
+  backLabel?: string;
+};
+
+export function QuizShell({
+  title,
+  subtitle,
+  children,
+  variant = "quiz",
+  progress,
+  showBack,
+  onBack,
+  backLabel = "Back",
+}: QuizShellProps) {
   const isHero = variant === "hero";
-  const isQuiz = variant === "quiz";
+
+  const titleSx = isHero
+    ? {
+        fontWeight: 800,
+        letterSpacing: "-0.02em",
+        lineHeight: 1.04,
+        fontSize: { xs: 34, sm: 50, md: 64 },
+      }
+    : {
+        fontWeight: 800,
+        letterSpacing: "-0.02em",
+        lineHeight: 1.06,
+        // quiz steps: slightly smaller than landing
+        fontSize: { xs: 30, sm: 40, md: 46 },
+      };
 
   return (
-    <Container
-      maxWidth={false}
-      sx={{
-        // Keep content centered and stable across steps
-        display: "flex",
-        justifyContent: "center",
-        py: { xs: 3, sm: 5 },
-      }}
-    >
-      <Card
-        elevation={0}
+    <Box sx={{ width: "100%" }}>
+      <Container
+        maxWidth={false}
         sx={{
           width: "100%",
-          // Keep the quiz shell from resizing wildly between steps
-          maxWidth: isHero ? 980 : 720,
-          borderRadius: { xs: 8, sm: 10 },
-          boxShadow: "0 22px 55px rgba(0,0,0,0.10)",
-          overflow: "hidden",
-          backgroundColor: "#fff",
-
-          // Stabilize height on larger screens so the “box” doesn’t jump.
-          // On mobile, let it grow naturally.
-          minHeight: isQuiz ? { xs: "auto", md: 640 } : "auto",
-
-          // Subtle internal padding differences by variant
-          px: { xs: 3, sm: 5 },
-          pt: isQuiz ? { xs: 3, sm: 4 } : { xs: 4, sm: 6 },
-          pb: { xs: 4, sm: 5 },
-
-          // Ensure content stays left-aligned within the shell (feels “survey-like”)
-          textAlign: "left",
+          display: "flex",
+          justifyContent: "center",
+          px: { xs: 2, sm: 3 },
+          py: { xs: 3, sm: 5 },
         }}
       >
-        {/* Progress only on quiz variant when provided */}
-        {isQuiz && progress ? (
-          <Box sx={{ mb: 2 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "baseline",
-                justifyContent: "space-between",
-                mb: 1,
-              }}
-            >
-              {/* If you later decide to remove Back entirely, just omit in your page.tsx */}
-              <Typography variant="body2" color="text.secondary">
-                {/* left slot intentionally empty for now */}
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary">
-                Step {progress.current} of {progress.total}
-              </Typography>
-            </Box>
-
-            <ProgressBar current={progress.current} total={progress.total} />
-          </Box>
-        ) : null}
-
-        {title ? (
-          <Typography
-            component="h1"
-            sx={{
-              fontWeight: 800,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              // Landing stays big; quiz steps slightly smaller (more “survey designed”)
-              fontSize: isHero
-                ? { xs: 42, sm: 54, md: 62 }
-                : { xs: 34, sm: 40, md: 46 },
-              color: "text.primary",
-            }}
-          >
-            {title}
-          </Typography>
-        ) : null}
-
-        {subtitle ? (
-          <Typography
-            sx={{
-              mt: 1.5,
-              mb: 3,
-              fontSize: { xs: 15, sm: 16 },
-              lineHeight: 1.5,
-              color: "text.secondary",
-              maxWidth: isHero ? 820 : 620,
-            }}
-          >
-            {subtitle}
-          </Typography>
-        ) : null}
-
-        {/* Content area */}
+        {/* Decision A: no outer “card” — keep content in a consistent column */}
         <Box
           sx={{
-            // Give quiz steps a stable “content frame” so short questions don’t collapse the card.
-            flex: "1 1 auto",
-            minHeight: isQuiz ? { xs: "auto", md: 420 } : "auto",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
+            width: "100%",
+            maxWidth: isHero ? 980 : 760,
           }}
         >
-          {children}
+          {/* Optional back (safe to keep, can disable by not passing showBack) */}
+          {showBack ? (
+            <Box
+              onClick={onBack}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") onBack?.();
+              }}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                cursor: "pointer",
+                color: "primary.main",
+                fontWeight: 600,
+                mb: 1.5,
+                opacity: 0.9,
+                "&:hover": { opacity: 1, textDecoration: "underline" },
+              }}
+            >
+              {backLabel}
+            </Box>
+          ) : null}
+
+          {/* Progress (quiz only) */}
+          {variant === "quiz" && progress ? (
+            <Box sx={{ mb: 2 }}>
+              <ProgressBar current={progress.current} total={progress.total} />
+            </Box>
+          ) : null}
+
+          {title ? (
+            <Typography sx={titleSx} color="text.primary">
+              {title}
+            </Typography>
+          ) : null}
+
+          {subtitle ? (
+            <Typography
+              sx={{
+                mt: 1.25,
+                maxWidth: isHero ? 820 : 720,
+                color: "text.secondary",
+                fontSize: { xs: 14.5, sm: 16 },
+                lineHeight: 1.6,
+              }}
+            >
+              {subtitle}
+            </Typography>
+          ) : null}
+
+          <Box sx={{ mt: title || subtitle ? 3 : 0 }}>{children}</Box>
         </Box>
-      </Card>
-    </Container>
+      </Container>
+    </Box>
   );
 }
