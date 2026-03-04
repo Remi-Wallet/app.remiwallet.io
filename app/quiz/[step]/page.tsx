@@ -48,10 +48,15 @@ function nextAfterSummary(tier: Tier) {
 
 export default function QuizStepPage() {
   const router = useRouter();
-  const params = useParams();
-  const step = Number(params.step);
+  const params = useParams<{ step?: string }>();
+  const step = Number(params.step || "0");
 
-  const screen = useMemo(() => screenByStep(step), [step]);
+  // guard bad route
+  useEffect(() => {
+    if (!Number.isFinite(step) || step <= 0) router.replace("/");
+  }, [step, router]);
+
+  const screen = useMemo(() => (Number.isFinite(step) ? screenByStep(step) : undefined), [step]);
   const [state, setState] = useState(() => loadQuizState());
 
   // Keep state in sync with localStorage (basic; fine for v1)
@@ -88,18 +93,12 @@ export default function QuizStepPage() {
     const score = computeScore(state.answers);
 
     useEffect(() => {
-      // DEBUG (remove later)
-      console.log("DEBUG_ANSWERS", state.answers);
-      console.log("DEBUG_SCORE", score);
-      console.log("DEBUG_TIER", tier);
-
       if (!state.tier) {
         const next = persistTier(tier);
         setState(next);
         track("tier_assigned", { tier, score });
-        track("quiz_complete", { segment: "segment1", tier, score });
       }
-
+      track("quiz_complete", { segment: "segment1", tier, score });
       vibrate([20, 30, 20]);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -136,19 +135,14 @@ export default function QuizStepPage() {
               variant="contained"
               size="large"
               onClick={() => {
-                track("quiz_complete", {
-                  segment: "segment1",
-                  tier,
-                  score,
-                  action: tier === "C" ? "join_early_access" : "continue",
-                });
+                track("quiz_complete", { segment: "segment1", tier, score, action: tier === "C" ? "join_early_access" : "continue" });
                 router.push(nextAfterSummary(tier));
               }}
             >
-              {tier === "C" ? "Join early access" : "Continue"}
+              {tier === "C" ? "Join early access" : "Optimize further"}
             </Button>
 
-            {/* Tier A/B only: subtle skip link (not a big CTA) */}
+            {/* Tier A/B only: subtle skip link */}
             {tier !== "C" ? (
               <Box sx={{ textAlign: "center" }}>
                 <Typography
@@ -159,11 +153,11 @@ export default function QuizStepPage() {
                     display: "inline-block",
                     mt: 0.25,
                     color: "text.secondary",
-                    opacity: 0.85,
+                    opacity: 0.55,
                     textDecoration: "none",
-                    "&:hover": { textDecoration: "underline", opacity: 1 },
+                    "&:hover": { textDecoration: "underline", opacity: 0.75 },
                   }}
-                  onClick={() => track("quiz_complete", { segment: "segment1", tier, score, action: "skip_to_beta" })}
+                  onClick={() => track("summary_skip_to_beta", { tier, score })}
                 >
                   Skip for now — join beta
                 </Typography>
@@ -191,7 +185,6 @@ export default function QuizStepPage() {
 
     if ((screen as any).autoAdvance) {
       window.setTimeout(() => {
-        // after step 4 => go to summary
         if (step === 4) {
           const t = computeTier(next.answers);
           const s = computeScore(next.answers);
@@ -213,7 +206,7 @@ export default function QuizStepPage() {
 
     const prev: string[] = Array.isArray(currentValue) ? currentValue : [];
     const has = prev.includes(value);
-    let nextVals = has ? prev.filter((v) => v !== value) : [...prev, value];
+    const nextVals = has ? prev.filter((v) => v !== value) : [...prev, value];
 
     const maxSelect = (screen as any).maxSelect as number | undefined;
     if (maxSelect && nextVals.length > maxSelect) return;

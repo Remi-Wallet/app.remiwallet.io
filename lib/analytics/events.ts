@@ -8,7 +8,11 @@ export type RemiEventName =
   | "tier_assigned"
   | "quiz_complete"
   | "lead_submit"
-  | "lead_submitted";
+  | "lead_submitted"
+  | "summary_cta"
+  | "summary_skip_to_beta"
+  | "summary_continue"
+  | "summary_to_waitlist";
 
 export type RemiEventPayload = Record<string, any>;
 

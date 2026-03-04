@@ -11,69 +11,95 @@ export function QuizShell(props: {
   progress?: { current: number; total: number };
   children: React.ReactNode;
   showBack?: boolean;
+
+  /** Optional: make landing feel more like a hero */
+  variant?: "hero" | "quiz";
 }) {
   const router = useRouter();
+  const variant = props.variant ?? (props.progress ? "quiz" : "hero");
 
   return (
     <Box
       sx={{
-        minHeight: "100dvh",
+        width: "100%", // ✅ prevents right shift in flex parent
         display: "flex",
+        justifyContent: "center",
         alignItems: "center",
-        py: { xs: 2, sm: 4 },
       }}
     >
-      <Container maxWidth="sm" sx={{ maxWidth: 520 }}>
+      <Container
+        maxWidth={variant === "hero" ? "md" : "sm"}
+        sx={{
+          // push a bit wider on desktop so it doesn’t feel “boxed”
+          maxWidth: variant === "hero" ? { xs: 560, md: 900 } : { xs: 560, md: 640 },
+          px: 0,
+        }}
+      >
         <Card
-          variant="outlined"
+          elevation={0}
           sx={{
-            borderColor: "rgba(0,0,0,0.06)",
-            p: { xs: 2.5, sm: 4 },
-            borderRadius: 5, // ~20px
+            width: "100%",
+            bgcolor: "#fff",
+            borderRadius: variant === "hero" ? 4 : 6,
+            border: "1px solid rgba(0,0,0,0.07)",
+            boxShadow: "0 18px 60px rgba(0,0,0,0.10)",
+            px: { xs: 3, sm: 4 },
+            py: { xs: 3, sm: 4 },
           }}
         >
-          {/* Top row */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.25 }}>
-            {props.showBack ? (
-              <Button
-                variant="text"
-                onClick={() => router.back()}
-                sx={{ minHeight: 40, px: 1 }}
-              >
-                Back
-              </Button>
-            ) : (
-              <span />
-            )}
+          {/* ✅ Reserve header space so pages don’t jump */}
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ height: 40, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box sx={{ minWidth: 64 }}>
+                {props.showBack ? (
+                  <Button
+                    variant="text"
+                    onClick={() => router.back()}
+                    sx={{ px: 0, minWidth: 0, fontWeight: 700, textTransform: "none" }}
+                  >
+                    Back
+                  </Button>
+                ) : null}
+              </Box>
 
-            {props.progress ? (
-              <Typography variant="body2" color="text.secondary">
-                Step {props.progress.current} of {props.progress.total}
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 88, textAlign: "right" }}>
+                {props.progress ? `Step ${props.progress.current} of ${props.progress.total}` : ""}
               </Typography>
-            ) : (
-              <span />
-            )}
+            </Box>
+
+            <Box sx={{ height: 10, mt: 1 }}>
+              {props.progress ? <ProgressBar value={props.progress.current} max={props.progress.total} /> : null}
+            </Box>
           </Box>
 
-          {/* Progress bar */}
-          {props.progress ? (
-            <Box sx={{ mb: 2.5 }}>
-              <ProgressBar value={props.progress.current} max={props.progress.total} />
-            </Box>
-          ) : null}
-
-          {/* Title + subtitle */}
+          {/* Headline */}
           {props.title ? (
             <Typography
-              variant="h4"
-              sx={{ mb: 1, fontWeight: 800, letterSpacing: "-0.02em" }}
+              sx={{
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.05,
+                mb: 1.25,
+                fontSize:
+                  variant === "hero"
+                    ? { xs: 34, sm: 44, md: 56 }
+                    : { xs: 34, sm: 40, md: 48 },
+              }}
             >
               {props.title}
             </Typography>
           ) : null}
 
+          {/* Subhead */}
           {props.subtitle ? (
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              sx={{
+                color: "text.secondary",
+                mb: 2.75,
+                lineHeight: 1.4,
+                fontSize: { xs: 15, sm: 16, md: 18 },
+              }}
+            >
               {props.subtitle}
             </Typography>
           ) : null}
