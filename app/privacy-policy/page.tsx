@@ -8,17 +8,14 @@ export default function PrivacyPolicyPage() {
     <LegalPageLayout title="Privacy Policy" lastUpdated="March 4, 2026">
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 6, md: 8 } }}>
       <Container maxWidth="md">
-
         <Typography variant="body1" paragraph>
           This Privacy Policy explains how Remi Wallet, Inc. (“Remi,” “we,” “us,” or “our”)
           collects, uses, and protects information when you use our website, waitlist, quiz, and
           related services (collectively, the “Service”).
         </Typography>
-
         <Typography variant="body1" paragraph>
           By using the Service, you acknowledge the practices described in this Privacy Policy.
         </Typography>
-
         <Typography variant="h5" sx={{ mt: 4, mb: 1.5, fontWeight: 700 }}>
           1. Information We Collect
         </Typography>
@@ -31,7 +28,6 @@ export default function PrivacyPolicyPage() {
           <li><Typography variant="body1">Usage information, such as interactions with pages, buttons, and quiz steps</Typography></li>
           <li><Typography variant="body1">Device and technical information, such as browser type, approximate location, IP address, and referring pages, as available</Typography></li>
         </Box>
-
         <Typography variant="h5" sx={{ mt: 4, mb: 1.5, fontWeight: 700 }}>
           2. How We Use Information
         </Typography>
@@ -46,7 +42,6 @@ export default function PrivacyPolicyPage() {
           <li><Typography variant="body1">Protect the security and integrity of the Service</Typography></li>
           <li><Typography variant="body1">Comply with legal obligations</Typography></li>
         </Box>
-
         <Typography variant="h5" sx={{ mt: 4, mb: 1.5, fontWeight: 700 }}>
           3. How We Share Information
         </Typography>
@@ -59,7 +54,6 @@ export default function PrivacyPolicyPage() {
           <li><Typography variant="body1">To protect the rights, safety, or security of Remi, our users, or others</Typography></li>
           <li><Typography variant="body1">In connection with a merger, financing, acquisition, or sale of assets</Typography></li>
         </Box>
-
         <Typography variant="h5" sx={{ mt: 4, mb: 1.5, fontWeight: 700 }}>
           4. Cookies and Analytics
         </Typography>
@@ -67,7 +61,6 @@ export default function PrivacyPolicyPage() {
           We may use cookies, local storage, analytics tools, and similar technologies to remember
           preferences, understand usage, and improve the Service.
         </Typography>
-
         <Typography variant="h5" sx={{ mt: 4, mb: 1.5, fontWeight: 700 }}>
           5. Data Retention
         </Typography>

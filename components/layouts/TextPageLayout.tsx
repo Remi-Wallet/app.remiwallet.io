@@ -1,6 +1,8 @@
 "use client";
 
 import { Box, Container, Typography } from "@mui/material";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 type LegalPageLayoutProps = {
   title: string;
