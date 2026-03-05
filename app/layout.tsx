@@ -1,6 +1,6 @@
 import * as React from "react";
 import Providers from "./providers";
-import { AppShell } from "@/components/layout/AppShell";
+import { AppShell } from "@/components/layouts/AppShell";
 
 export const metadata = {
   title: "REMI",
