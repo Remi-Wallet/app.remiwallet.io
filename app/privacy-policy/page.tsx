@@ -51,8 +51,9 @@ export default function PrivacyPolicyPage() {
 
       <h2>4. Cookies and Analytics</h2>
       <p>
-        We may use cookies, local storage, analytics tools, and similar technologies to
-        remember preferences, understand usage, and improve the Service.
+        We may use cookies, local storage, analytics tools, and similar technologies to remember
+        preferences, understand usage, and improve the Service. For more details, see our{" "}
+        <a href="/cookie-policy">Cookie Policy</a>.
       </p>
 
       <h2>5. Data Retention</h2>
