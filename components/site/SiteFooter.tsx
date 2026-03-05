@@ -12,8 +12,7 @@ type SiteFooterProps = {
   disclaimer?: string;
 
   /**
-   * Footer colors: use darker emerald/teal to feel “anchored”
-   * while staying compatible with the Remi green CTA.
+   * Footer colors
    */
   bgTop?: string; // main footer
   bgBottom?: string; // disclaimer band
@@ -29,8 +28,9 @@ export function SiteFooter(props: SiteFooterProps) {
     props.disclaimer ??
     "Remi provides informational and educational content only and does not provide financial, tax, legal, or investment advice. Optimization insights may improve as we learn more about your card setup, rewards behavior, and preferences.";
 
-  const bgTop = props.bgTop ?? "#243447";
-  const bgBottom = props.bgBottom ?? "#1B2838";
+  // Defaults match the current stage styling
+  const bgTop = props.bgTop ?? "#0F355A";
+  const bgBottom = props.bgBottom ?? "#0A2642";
 
   return (
     <Box component="footer" sx={{ width: "100%", mt: "auto" }}>
@@ -38,50 +38,66 @@ export function SiteFooter(props: SiteFooterProps) {
       <Box
         sx={{
           borderTop: "1px solid rgba(255,255,255,0.08)",
-          backgroundColor: "#0F355A",
+          backgroundColor: bgTop,
           color: "rgba(255,255,255,0.92)",
         }}
       >
         <Container maxWidth="lg">
           <Box
             sx={{
-              position: "relative",
-              minHeight: 72,
-              display: "flex",
+              px: 2,
+              py: 2,
+              // Desktop: 3-column grid (left spacer | centered copyright | right-aligned links)
+              // Mobile: stacked (copyright then links)
+              display: { xs: "flex", sm: "grid" },
+              flexDirection: { xs: "column" },
               alignItems: "center",
               justifyContent: "center",
+              gridTemplateColumns: { sm: "1fr auto 1fr" },
+              columnGap: 2,
+              rowGap: { xs: 1, sm: 0 },
+              textAlign: { xs: "center", sm: "left" },
             }}
           >
+            {/* Spacer column so the copyright can truly sit centered while links are right-aligned */}
+            <Box sx={{ display: { xs: "none", sm: "block" } }} />
+
             <Typography
               variant="body2"
               sx={{
-                textAlign: "center",
                 fontWeight: 500,
                 letterSpacing: 0.1,
+                opacity: 0.9,
+                justifySelf: { sm: "center" },
               }}
             >
-              © 2026 Remi Wallet, Inc. All rights reserved.
+              © {year} {company}. All rights reserved.
             </Typography>
 
+            {/* Link group */}
             <Box
               sx={{
-                position: "absolute",
-                right: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
                 display: "flex",
                 gap: 3,
+                flexWrap: "wrap",
+                justifyContent: { xs: "center", sm: "flex-end" },
+                width: { xs: "100%", sm: "auto" },
+                justifySelf: { sm: "end" },
               }}
             >
               <Link
-                href="/privacy-policy"
-                style={{ textDecoration: "none", color: "inherit", fontWeight: 600 }}
+                href={privacyHref}
+                underline="hover"
+                color="inherit"
+                sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
               >
                 Privacy Policy
               </Link>
               <Link
-                href="/terms-of-use"
-                style={{ textDecoration: "none", color: "inherit", fontWeight: 600 }}
+                href={termsHref}
+                underline="hover"
+                color="inherit"
+                sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
               >
                 Terms of Use
               </Link>
@@ -93,7 +109,7 @@ export function SiteFooter(props: SiteFooterProps) {
       {/* Sub-footer disclaimer */}
       <Box
         sx={{
-          backgroundColor: "#0A2642",
+          backgroundColor: bgBottom,
           color: "rgba(255,255,255,0.78)",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           py: 1.75,
@@ -107,9 +123,10 @@ export function SiteFooter(props: SiteFooterProps) {
               textAlign: "center",
               lineHeight: 1.7,
               fontSize: "0.78rem",
+              px: 2,
             }}
           >
-            Remi provides informational and educational content only and does not provide financial, tax, legal, or investment advice. Optimization insights may improve as we learn more about your card setup, rewards behavior, and preferences.
+            {disclaimer}
           </Typography>
         </Container>
       </Box>
