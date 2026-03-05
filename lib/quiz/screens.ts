@@ -75,12 +75,12 @@ export const SCREENS: Record<number, QuizScreen> = {
     progress: { current: 1, total: 3 }, // advanced segment progress
     autoAdvance: true,
     options: [
-      { label: "Dining", value: "dining" },
-      { label: "Groceries", value: "groceries" },
-      { label: "Travel", value: "travel" },
-      { label: "Shopping", value: "shopping" },
-      { label: "Gas / Transit", value: "transit" },
-      { label: "Other", value: "other" },
+      { label: "Dining", value: "dining", icon: "🍽️" },
+      { label: "Groceries", value: "groceries", icon: "🛒" },
+      { label: "Travel", value: "travel", icon: "✈️" },
+      { label: "Shopping", value: "shopping", icon: "🛍️" },
+      { label: "Gas / Transit", value: "transit", icon: "⛽️" },
+      { label: "Other", value: "other", icon: "✨" },
     ],
   },
 
