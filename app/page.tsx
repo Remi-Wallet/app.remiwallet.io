@@ -73,7 +73,7 @@ export default function HomePage() {
 
   const onStart = () => {
     getOrCreateSessionId();
-    router.push("/quiz/2");
+    router.push("/quiz/1");
   };
 
   return (

@@ -1,3 +1,5 @@
+// app/quiz/[step]/page.tsx
+
 "use client";
 
 import * as React from "react";
@@ -9,15 +11,14 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { QuizShell } from "@/components/quiz/QuizShell";
 import { OptionList } from "@/components/quiz/OptionList";
 import { OptionGrid } from "@/components/quiz/OptionGrid";
-import { SummaryBars } from "@/components/quiz/SummaryBars";
 
 import { screenByStep } from "@/lib/quiz/screens";
 import { loadQuizState, saveAnswer, persistTier } from "@/lib/quiz/storage";
 import type { Answers, Tier } from "@/lib/quiz/types";
-import { nextAfterSummary } from "@/lib/quiz/routing";
-import { computeTierScore as computeScore, computeTierFromAnswers as computeTier } from "@/lib/quiz/scoring";
-
-
+import {
+  computeTierScore as computeScore,
+  computeTierFromAnswers as computeTier,
+} from "@/lib/quiz/scoring";
 
 function vibrate(pattern: number | number[]) {
   try {
@@ -25,16 +26,29 @@ function vibrate(pattern: number | number[]) {
       // @ts-ignore
       navigator.vibrate(pattern);
     }
-  } catch { }
+  } catch {}
 }
 
-function nextRouteForStep(step: number) {
-  if (step === 4) return "/quiz/5";
-  if (step === 8) return "/early-access";
+/**
+ * Option B flow (renumbered steps 1–6):
+ * - step 3 is tier gate (after Q3)
+ *   - Tier C => /quiz/results
+ *   - Tier A/B => /quiz/4
+ * - step 6 ends => /quiz/results
+ */
+function nextRouteForStep(step: number, answers: Answers) {
+  if (step === 3) {
+    const tier = computeTier(answers);
+    persistTier(tier);
+    return tier === "C" ? "/quiz/results" : "/quiz/4";
+  }
+  if (step === 6) return "/quiz/results";
   return `/quiz/${step + 1}`;
 }
 
-function toProgress(screen: any): { current: number; total: number } | undefined {
+function toProgress(
+  screen: any
+): { current: number; total: number } | undefined {
   if (!screen) return undefined;
 
   // Older style: progress object already present
@@ -67,7 +81,11 @@ export default function QuizStepPage() {
     if (!Number.isFinite(stepNum) || stepNum <= 0) router.replace("/");
   }, [stepNum, router]);
 
-  const screen = useMemo(() => (Number.isFinite(stepNum) ? screenByStep(stepNum) : undefined), [stepNum]);
+  const screen = useMemo(
+    () => (Number.isFinite(stepNum) ? screenByStep(stepNum) : undefined),
+    [stepNum]
+  );
+
   const [state, setState] = useState(() => loadQuizState());
 
   useEffect(() => {
@@ -80,123 +98,49 @@ export default function QuizStepPage() {
 
   if (!screen) return null;
 
-  const questionKey = ((screen as any).questionKey ?? (screen as any).key) as string | undefined;
-  
-  //JAMESENET -- Add small debug step here but should abstract this later
-  if (process.env.NODE_ENV !== "production") {
-    console.log("DEBUG_STEP", stepNum, "screenKey", questionKey, "type", (screen as any).type);
+  // Safety: summary screens should not exist in /quiz/[step] anymore
+  if ((screen as any).type === "summary") {
+    router.replace("/quiz/results");
+    return null;
   }
-  
-  const currentValue = questionKey ? (state.answers as any)?.[questionKey] : undefined;
-  //Allow the user to select nothing on Steps 7 and 
-  const allowEmpty = stepNum === 7 || stepNum === 8;
+
+  const questionKey =
+    ((screen as any).questionKey ?? (screen as any).key) as string | undefined;
+
+  if (process.env.NODE_ENV !== "production") {
+    // Helpful proof log
+    // eslint-disable-next-line no-console
+    console.log("SCREEN_PROOF", stepNum, (screen as any)?.type, (screen as any)?.title, questionKey);
+  }
+
+  const currentValue = questionKey
+    ? (state.answers as any)?.[questionKey]
+    : undefined;
+
+  // Allow empty selection on travel + everyday card steps (now 5 & 6)
+  const allowEmpty = stepNum === 5 || stepNum === 6;
   const selectedCount = Array.isArray(currentValue) ? currentValue.length : 0;
 
-  // SUMMARY
-  if (screen.type === "summary") {
-    const answers = state.answers as Answers;
-    const score = computeScore(answers);
-    const tier: Tier = state.tier ?? computeTier(answers);
-
-    useEffect(() => {
-      if (!state.tier) {
-        const next = persistTier(tier);
-        setState(next);
-      }
-      vibrate([20, 30, 20]);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const copy = getSummaryCopy(tier);
-
-    return (
-      <QuizShell variant="quiz" title={copy.title} subtitle={copy.subtitle}>
-        <Box className="remi-summary">
-          <Stack spacing={2}>
-            <SummaryBars rows={copy.bars} caption="Most people have an opportunity gap — Remi helps close it." />
-
-            <Box
-              sx={{
-                border: "1px solid rgba(6,214,160,0.35)",
-                backgroundColor: "rgba(6,214,160,0.06)",
-                borderRadius: 16,
-                p: 2,
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>
-                {copy.calloutTitle}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {copy.calloutBody}
-              </Typography>
-            </Box>
-
-            <Typography variant="body2" color="text.secondary">
-              {copy.body}
-            </Typography>
-
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => {
-                router.push(nextAfterSummary(tier));
-              }}
-            >
-              {tier === "C" ? "Join early access" : "Optimize further"}
-            </Button>
-
-            {tier !== "C" ? (
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  component={Link}
-                  href="/early-access"
-                  variant="caption"
-                  sx={{
-                    display: "inline-block",
-                    mt: 0.25,
-                    color: "text.secondary",
-                    opacity: 0.55,
-                    textDecoration: "none",
-                    "&:hover": { textDecoration: "underline", opacity: 0.75 },
-                  }}
-                >
-                  Skip for now — join beta
-                </Typography>
-              </Box>
-            ) : null}
-
-            <Button variant="text" onClick={() => router.push("/")}>
-              Restart
-            </Button>
-
-            <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.6, textAlign: "center" }}>
-              Score: {score} • Tier {tier}
-            </Typography>
-          </Stack>
-        </Box>
-      </QuizShell>
-    );
-  }
-
-  // QUESTIONS
   const progress = toProgress(screen);
 
   const onSingleSelect = (value: string) => {
-    if (screen.type !== "single" || !questionKey) return;
+    if ((screen as any).type !== "single" || !questionKey) return;
 
     vibrate(10);
+
     const next = saveAnswer(questionKey, value);
     setState(next);
 
     if ((screen as any).autoAdvance) {
+      const nextAnswers = next.answers as Answers;
       window.setTimeout(() => {
-        router.push(nextRouteForStep(stepNum));
+        router.push(nextRouteForStep(stepNum, nextAnswers));
       }, 280);
     }
   };
 
   const onMultiToggle = (value: string) => {
-    if (screen.type !== "multi" || !questionKey) return;
+    if ((screen as any).type !== "multi" || !questionKey) return;
 
     const prev: string[] = Array.isArray(currentValue) ? currentValue : [];
     const has = prev.includes(value);
@@ -206,18 +150,26 @@ export default function QuizStepPage() {
     if (maxSelect && nextVals.length > maxSelect) return;
 
     vibrate(has ? 8 : 12);
+
     const next = saveAnswer(questionKey, nextVals);
     setState(next);
   };
 
   const onContinueMulti = () => {
-    router.push(nextRouteForStep(stepNum));
+    // safest: read from storage to ensure latest values
+    const latest = loadQuizState();
+    router.push(nextRouteForStep(stepNum, latest.answers as Answers));
   };
 
   return (
-    <QuizShell variant="quiz" title={screen.title} subtitle={screen.subtitle} progress={progress}>
+    <QuizShell
+      variant="quiz"
+      title={(screen as any).title}
+      subtitle={(screen as any).subtitle}
+      progress={progress}
+    >
       <Box className="remi-screen">
-        {screen.type === "single" ? (
+        {(screen as any).type === "single" ? (
           <OptionList
             options={(screen as any).options}
             selected={typeof currentValue === "string" ? currentValue : null}
@@ -225,7 +177,7 @@ export default function QuizStepPage() {
           />
         ) : null}
 
-        {screen.type === "multi" ? (
+        {(screen as any).type === "multi" ? (
           <Stack spacing={2}>
             <OptionGrid
               options={(screen as any).options}
@@ -248,54 +200,25 @@ export default function QuizStepPage() {
                 Select up to {(screen as any).maxSelect}.
               </Typography>
             ) : null}
+
+            <Typography
+              component={Link}
+              href="/"
+              variant="caption"
+              sx={{
+                display: "inline-block",
+                textAlign: "center",
+                color: "text.secondary",
+                opacity: 0.55,
+                textDecoration: "none",
+                "&:hover": { textDecoration: "underline", opacity: 0.75 },
+              }}
+            >
+              Restart
+            </Typography>
           </Stack>
         ) : null}
       </Box>
     </QuizShell>
   );
-}
-
-function getSummaryCopy(tier: Tier) {
-  if (tier === "A") {
-    return {
-      title: "You’re a strong candidate for serious rewards optimization.",
-      subtitle: "You likely have meaningful upside with better timing + card strategy.",
-      body: "Answer a few more questions so Remi can tailor recommendations to your spend profile.",
-      calloutTitle: "You may be missing high-value redemptions.",
-      calloutBody: "Optimized users stack the right card, category, and redemption window.",
-      bars: [
-        { label: "Average users", value: 0.35 },
-        { label: "Optimized", value: 0.72, emphasis: true },
-        { label: "Fully optimized", value: 0.94 },
-      ],
-    };
-  }
-
-  if (tier === "B") {
-    return {
-      title: "You’re close — a few changes could improve your rewards quickly.",
-      subtitle: "You don’t need a full overhaul to capture more value.",
-      body: "Answer a few more questions so Remi can focus on the highest-impact moves for you.",
-      calloutTitle: "You likely have easy wins.",
-      calloutBody: "Small shifts in which card you use for big categories can add up fast.",
-      bars: [
-        { label: "Average users", value: 0.35 },
-        { label: "Optimized", value: 0.62, emphasis: true },
-        { label: "Fully optimized", value: 0.9 },
-      ],
-    };
-  }
-
-  return {
-    title: "You can still earn more — without changing how you spend.",
-    subtitle: "Start simple. Build confidence. Improve over time.",
-    body: "Join early access and we’ll notify you when Remi is ready for your profile.",
-    calloutTitle: "Good news: most people start here.",
-    calloutBody: "Remi helps you learn a simple system so you capture more rewards with less effort.",
-    bars: [
-      { label: "Average users", value: 0.35, emphasis: true },
-      { label: "Optimized", value: 0.65 },
-      { label: "Fully optimized", value: 0.92 },
-    ],
-  };
 }

@@ -11,9 +11,9 @@ export default function SiteHeader() {
       component="header"
       sx={{
         width: "100%",
-        borderBottom: "1px solid rgba(0, 61, 115, 0.08)",
-        backgroundColor: "rgba(255,255,255,0.52)",
-        backdropFilter: "blur(8px)",
+        bgcolor: "rgba(255,255,255,0.55)",          // less stark than white
+        backdropFilter: "blur(10px)",               // makes it feel more “native”
+        borderBottom: "1px solid rgba(0,0,0,0.06)", // subtle definition
       }}
     >
       <Container maxWidth="lg">

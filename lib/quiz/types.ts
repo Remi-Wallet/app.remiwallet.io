@@ -25,3 +25,25 @@ export type QuizState = {
   startedAt?: number;
   updatedAt?: number;
 };
+export type BaseScreen = {
+  step: number;
+  title: string;
+  subtitle?: string;
+  progress?: { current: number; total: number };
+};
+
+export type SingleScreen = BaseScreen & {
+  type: "single";
+  questionKey: string;
+  options: QuizOption[];
+  autoAdvance?: boolean;
+};
+
+export type MultiScreen = BaseScreen & {
+  type: "multi";
+  questionKey: string;
+  options: QuizOption[];
+  maxSelect?: number;
+};
+
+export type QuizScreen = SingleScreen | MultiScreen;
