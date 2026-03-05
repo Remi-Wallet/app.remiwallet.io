@@ -1,39 +1,51 @@
+// app/site/SiteHeader.tsx
+
 "use client";
 
-import * as React from "react";
+import Link from "next/link";
 import { Box, Container, Typography } from "@mui/material";
 
-export function SiteHeader() {
+export default function SiteHeader() {
   return (
     <Box
       component="header"
       sx={{
-        height: 56,
-        display: "flex",
-        alignItems: "center",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        bgcolor: "rgba(236,234,235,0.8)",
-        backdropFilter: "blur(10px)",
+        width: "100%",
+        borderBottom: "1px solid rgba(0, 61, 115, 0.08)",
+        backgroundColor: "rgba(255,255,255,0.52)",
+        backdropFilter: "blur(8px)",
       }}
     >
-      <Container
-        maxWidth="lg"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          px: { xs: 2, sm: 3 },
-        }}
-      >
-        <Typography
+      <Container maxWidth="lg">
+        <Box
           sx={{
-            fontWeight: 900,
-            letterSpacing: "0.08em",
-            color: "text.primary",
+            minHeight: 72,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: { xs: 1, sm: 0 },
           }}
         >
-          REMI
-        </Typography>
+          <Typography
+            component={Link}
+            href="/"
+            sx={{
+              textDecoration: "none",
+              color: "#003D73",
+              fontSize: { xs: "1.08rem", sm: "1.12rem", md: "1.2rem" },
+              fontWeight: 800,
+              letterSpacing: "0.12em",
+              lineHeight: 1,
+              textTransform: "uppercase",
+              transition: "opacity 160ms ease",
+              "&:hover": {
+                opacity: 0.82,
+              },
+            }}
+          >
+            Remi
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );

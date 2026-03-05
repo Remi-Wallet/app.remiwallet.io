@@ -1,3 +1,5 @@
+//app/page.tsx
+
 "use client";
 
 import * as React from "react";
@@ -5,43 +7,64 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getOrCreateSessionId } from "@/lib/quiz/storage";
 
-function BoosterRow(props: { title: string; subtitle: string }) {
+function ConfidenceItem(props: {
+  icon: string;
+  title: string;
+  body: string;
+}) {
   return (
-    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 1.75,
+      }}
+    >
       <Box
         sx={{
-          mt: "6px",
-          width: 10,
-          height: 10,
-          borderRadius: 999,
-          bgcolor: "rgba(6, 214, 160, 0.35)",
-          boxShadow: "inset 0 0 0 2px rgba(6, 214, 160, 0.35)",
-          flex: "0 0 auto",
+          width: 26,
+          height: 26,
+          minWidth: 26,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "999px",
+          backgroundColor: "rgba(6,214,160,0.14)",
+          color: "#06D6A0",
+          fontSize: "0.95rem",
+          fontWeight: 800,
+          lineHeight: 1,
+          mt: "2px",
+          boxShadow: "inset 0 0 0 1px rgba(6,214,160,0.18)",
         }}
-      />
+      >
+        {props.icon}
+      </Box>
+
       <Box>
         <Typography
           sx={{
-            fontSize: 14,
+            fontSize: { xs: "1rem", sm: "1.02rem" },
             fontWeight: 700,
-            color: "text.primary",
-            lineHeight: 1.2,
+            color: "#003D73",
+            lineHeight: 1.35,
+            mb: 0.35,
           }}
         >
           {props.title}
         </Typography>
+
         <Typography
           sx={{
-            fontSize: 12.5,
-            color: "text.secondary",
-            mt: 0.35,
-            lineHeight: 1.35,
+            fontSize: { xs: "0.95rem", sm: "0.98rem" },
+            color: "#6F6A72",
+            lineHeight: 1.62,
           }}
         >
-          {props.subtitle}
+          {props.body}
         </Typography>
       </Box>
-    </Stack>
+    </Box>
   );
 }
 
@@ -56,28 +79,27 @@ export default function HomePage() {
   return (
     <Box
       sx={{
-        // AppShell should already provide full-height layout;
-        // this just centers the landing content nicely.
         width: "100%",
         display: "flex",
         justifyContent: "center",
         px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6 },
+        py: { xs: 4, sm: 6, md: 7 },
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: 920, // makes desktop feel more “landing page”, not a tiny box
+          maxWidth: 920,
         }}
       >
         <Typography
           sx={{
             fontWeight: 800,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.025em",
             color: "#003D73",
-            fontSize: { xs: 40, sm: 52, md: 62 },
-            lineHeight: { xs: 1.05, sm: 1.05, md: 1.02 },
+            fontSize: { xs: 38, sm: 52, md: 62 },
+            lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
+            maxWidth: 860,
             mb: 2,
           }}
         >
@@ -92,9 +114,9 @@ export default function HomePage() {
           sx={{
             color: "text.secondary",
             fontSize: { xs: 16, sm: 18 },
-            lineHeight: 1.55,
+            lineHeight: 1.58,
             maxWidth: 720,
-            mb: 3,
+            mb: 3.25,
           }}
         >
           Take 60 seconds to see if you’re leaving value on the table.
@@ -110,6 +132,7 @@ export default function HomePage() {
               height: 60,
               borderRadius: 3,
               fontWeight: 700,
+              fontSize: "1rem",
               textTransform: "none",
               bgcolor: "#06D6A0",
               boxShadow: "0 10px 24px rgba(0,0,0,0.10)",
@@ -120,10 +143,28 @@ export default function HomePage() {
             Start
           </Button>
 
-          <Stack spacing={1.5} sx={{ mt: 2.25 }}>
-            <BoosterRow title="Bank-level security" subtitle="Best practices to protect your data." />
-            <BoosterRow title="We don’t share your data" subtitle="No selling personal info." />
-            <BoosterRow title="Mostly anonymous" subtitle="For most of this quiz, we won’t even know who you are." />
+          <Stack
+            spacing={2.25}
+            sx={{
+              mt: 3.25,
+              maxWidth: 600,
+            }}
+          >
+            <ConfidenceItem
+              icon="✓"
+              title="Bank-level security"
+              body="We use modern infrastructure and security practices designed to protect your information."
+            />
+            <ConfidenceItem
+              icon="✓"
+              title="We don’t share your data"
+              body="Your responses are used to improve your experience with Remi, not sold to third parties."
+            />
+            <ConfidenceItem
+              icon="✓"
+              title="Mostly anonymous to start"
+              body="For most of this quiz, we won’t even know who you are until you choose to join the waitlist."
+            />
           </Stack>
         </Box>
       </Box>
