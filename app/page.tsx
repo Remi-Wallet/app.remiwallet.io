@@ -151,19 +151,19 @@ export default function HomePage() {
             }}
           >
             <ConfidenceItem
-              icon="🔒"
-              title="Your info stays protected"
-              body="We use modern security practices and collect only what we need for this early experience."
+              icon="🛡️"
+              title="Built with privacy in mind"
+              body="This early quiz is designed to collect minimal information while helping us learn what matters most to users like you."
             />
             <ConfidenceItem
-              icon="🕶️"
-              title="Anonymous until you opt in"
-              body="You can go through most of the quiz without telling us who you are. We only ask for contact details if you choose to join the waitlist."
+              icon="👤"
+              title="No personal details upfront"
+              body="You can answer the core questions before sharing your name, email, or anything else that identifies you."
             />
             <ConfidenceItem
-              icon="⚡"
-              title="Fast, simple, and risk-free"
-              body="It takes about a minute to complete, and you can see where you may be leaving rewards on the table without any commitment."
+              icon="✨"
+              title="Quick insight, no commitment"
+              body="In about 60 seconds, you’ll get a clearer sense of how much value you may be missing from your current card setup."
             />
           </Stack>
         </Box>
