@@ -151,19 +151,19 @@ export default function HomePage() {
             }}
           >
             <ConfidenceItem
-              icon="✓"
-              title="Bank-level security"
-              body="We use modern infrastructure and security practices designed to protect your information."
+              icon="🔒"
+              title="Your info stays protected"
+              body="We use modern security practices and collect only what we need for this early experience."
             />
             <ConfidenceItem
-              icon="✓"
-              title="We don’t share your data"
-              body="Your responses are used to improve your experience with Remi, not sold to third parties."
+              icon="🕶️"
+              title="Anonymous until you opt in"
+              body="You can go through most of the quiz without telling us who you are. We only ask for contact details if you choose to join the waitlist."
             />
             <ConfidenceItem
-              icon="✓"
-              title="Mostly anonymous to start"
-              body="For most of this quiz, we won’t even know who you are until you choose to join the waitlist."
+              icon="⚡"
+              title="Fast, simple, and risk-free"
+              body="It takes about a minute to complete, and you can see where you may be leaving rewards on the table without any commitment."
             />
           </Stack>
         </Box>
