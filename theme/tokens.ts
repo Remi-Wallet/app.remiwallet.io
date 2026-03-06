@@ -1,7 +1,7 @@
 // theme/tokens.ts
 
 export const tokens = {
-  bbrand: {
+  brand: {
     name: "Remi",
     legalName: "Remi Wallet, Inc.",
     assets: {
