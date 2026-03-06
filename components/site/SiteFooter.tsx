@@ -26,7 +26,7 @@ export function SiteFooter(props: SiteFooterProps) {
 
   const disclaimer =
     props.disclaimer ??
-    "Remi provides informational and educational content only and does not provide financial, tax, legal, or investment advice. Optimization insights may improve as we learn more about your card setup, rewards behavior, and preferences.";
+    "Remi provides informational and educational content through this waitlist and beta experience only. Remi does not provide financial, tax, legal, or investment advice. Any rewards estimates, optimization insights, or product descriptions are illustrative and may change.";
 
   // Defaults match the current stage styling
   const bgTop = props.bgTop ?? "#0F355A";
