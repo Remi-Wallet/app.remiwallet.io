@@ -5,7 +5,7 @@
 import * as React from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getOrCreateSessionId } from "@/lib/quiz/storage";
+import { clearResultsSnapshot, clearQuizState } from "@/lib/quiz/storage";
 
 function ConfidenceItem(props: {
   icon: string;
@@ -72,7 +72,8 @@ export default function HomePage() {
   const router = useRouter();
 
   const onStart = () => {
-    getOrCreateSessionId();
+    clearResultsSnapshot();
+    clearQuizState(true);
     router.push("/quiz/1");
   };
 

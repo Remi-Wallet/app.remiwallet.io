@@ -8,7 +8,14 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { QuizShell } from "@/components/quiz/QuizShell";
 import { SummaryBars } from "@/components/quiz/SummaryBars";
 
-import { loadQuizState, persistTier } from "@/lib/quiz/storage";
+import {
+  loadQuizState,
+  persistTier,
+  saveResultsSnapshot,
+  loadResultsSnapshot,
+  clearQuizAnswersKeepSession,
+} from "@/lib/quiz/storage";
+
 import type { Tier } from "@/lib/quiz/types";
 import { computeTierFromAnswers, computeTierScore } from "@/lib/quiz/scoring";
 
@@ -64,22 +71,49 @@ function getSummaryCopy(tier: Tier) {
 }
 
 export default function QuizResultsPage() {
-  const [state, setState] = React.useState(() => loadQuizState());
+  const [tier, setTier] = React.useState<Tier>("C");
+  const [score, setScore] = React.useState<number>(0);
 
   React.useEffect(() => {
     const latest = loadQuizState();
-    setState(latest);
 
-    const tier: Tier = latest.tier ?? computeTierFromAnswers(latest.answers);
-    if (!latest.tier) {
-      setState(persistTier(tier));
+    // If we still have answers, compute results from them and snapshot.
+    const hasAnswers = latest.answers && Object.keys(latest.answers).length > 0;
+
+    if (hasAnswers) {
+      const computedTier: Tier = latest.tier ?? computeTierFromAnswers(latest.answers);
+      const computedScore = computeTierScore(latest.answers);
+
+      setTier(computedTier);
+      setScore(computedScore);
+
+      if (!latest.tier) persistTier(computedTier);
+
+      saveResultsSnapshot({
+        tier: computedTier,
+        score: computedScore,
+        computedAt: Date.now(),
+      });
+
+      // Clear answers but keep sessionId (+ tier for correlation)
+      clearQuizAnswersKeepSession(true);
+    } else {
+      // No answers (likely refresh) — use session snapshot
+      const snap = loadResultsSnapshot();
+      if (snap) {
+        setTier(snap.tier);
+        setScore(snap.score);
+      } else {
+        // If there is no snapshot, send them home (or show a friendly message)
+        // Keeping it simple:
+        setTier(latest.tier ?? "C");
+        setScore(0);
+      }
     }
 
     vibrate([20, 30, 20]);
   }, []);
 
-  const tier: Tier = state.tier ?? computeTierFromAnswers(state.answers);
-  const score = computeTierScore(state.answers);
   const copy = getSummaryCopy(tier);
 
   return (

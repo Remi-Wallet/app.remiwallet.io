@@ -5,12 +5,19 @@ import type { Answers, QuizState, Tier } from "./types";
 export const SESSION_ID_KEY = "remi_session_id";
 export const QUIZ_STATE_KEY = "remi_quiz_state";
 export const TIER_KEY = "remi_tier";
+export const RESULTS_SNAPSHOT_KEY = "remi_results_snapshot";
 
 // legacy compat key (only used if machine.ts still references it)
 const LS_STORED_QUIZ = "remi_quiz_stored_v1";
 
 const STORAGE_VERSION = 1;
 type EnvelopeV1 = { v: 1; data: QuizState };
+
+export type ResultsSnapshot = {
+  tier: Tier;
+  score: number;
+  computedAt: number;
+};
 
 function now() {
   return Date.now();
@@ -187,6 +194,48 @@ export function clearQuizState(keepSession = true) {
   } catch {
     // ignore
   }
+}
+export function saveResultsSnapshot(snapshot: ResultsSnapshot) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(RESULTS_SNAPSHOT_KEY, JSON.stringify(snapshot));
+  } catch {
+    // ignore
+  }
+}
+
+export function loadResultsSnapshot(): ResultsSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(RESULTS_SNAPSHOT_KEY);
+    return raw ? (JSON.parse(raw) as ResultsSnapshot) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearResultsSnapshot() {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(RESULTS_SNAPSHOT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Clear answers but keep sessionId so analytics correlation remains intact.
+ * This is the “finish -> clear answers” behavior.
+ */
+export function clearQuizAnswersKeepSession(keepTier = true): QuizState {
+  const state = loadQuizState();
+  const next: QuizState = {
+    ...state,
+    answers: {},
+    tier: keepTier ? state.tier : undefined,
+    updatedAt: now(),
+  };
+  return saveQuizState(next);
 }
 
 /**
