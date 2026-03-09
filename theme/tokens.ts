@@ -3,7 +3,7 @@
 export const tokens = {
   brand: {
     name: "Remi",
-    legalName: "Remi Wallet, Inc.",
+    legalName: "Remi Wallet, Inc",
     assets: {
       logo: {
         fullLockup: {
