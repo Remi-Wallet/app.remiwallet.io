@@ -112,10 +112,6 @@ export default function QuizResultsPage() {
             Join early access
           </Button>
 
-          <Button variant="text" component={Link} href="/">
-            Restart
-          </Button>
-
           <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.6, textAlign: "center" }}>
             Score: {score} • Tier {tier}
           </Typography>

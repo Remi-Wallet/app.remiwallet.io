@@ -22,8 +22,8 @@ export type QuizState = {
   sessionId: string;
   answers: Answers;
   tier?: Tier;
-  startedAt?: number;
-  updatedAt?: number;
+  startedAt: number;
+  updatedAt: number;
 };
 export type BaseScreen = {
   step: number;

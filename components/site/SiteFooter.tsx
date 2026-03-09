@@ -20,7 +20,7 @@ type SiteFooterProps = {
 
 export function SiteFooter(props: SiteFooterProps) {
   const year = props.year ?? new Date().getFullYear();
-  const company = props.company ?? "Remi Wallet, Inc.";
+  const company = props.company ?? "Remi Wallet, Inc";
   const privacyHref = props.privacyHref ?? "/privacy-policy";
   const termsHref = props.termsHref ?? "/terms-of-use";
 

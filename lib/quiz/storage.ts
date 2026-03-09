@@ -1,4 +1,5 @@
 // lib/quiz/storage.ts
+
 import type { Answers, QuizState, Tier } from "./types";
 
 export const SESSION_ID_KEY = "remi_session_id";
@@ -7,6 +8,21 @@ export const TIER_KEY = "remi_tier";
 
 // legacy compat key (only used if machine.ts still references it)
 const LS_STORED_QUIZ = "remi_quiz_stored_v1";
+
+const STORAGE_VERSION = 1;
+type EnvelopeV1 = { v: 1; data: QuizState };
+
+function now() {
+  return Date.now();
+}
+
+function createId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `sess_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  }
+}
 
 /**
  * Session ID
@@ -17,15 +33,40 @@ export function getOrCreateSessionId(): string {
   const existing = localStorage.getItem(SESSION_ID_KEY);
   if (existing) return existing;
 
-  let id: string;
-  try {
-    id = crypto.randomUUID();
-  } catch {
-    id = `sess_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-  }
-
+  const id = createId();
   localStorage.setItem(SESSION_ID_KEY, id);
   return id;
+}
+
+function normalizeQuizState(input: Partial<QuizState> | null | undefined): QuizState {
+  const sessionId = input?.sessionId || getOrCreateSessionId();
+  const t = now();
+
+  return {
+    sessionId,
+    answers: (input?.answers ?? {}) as Answers,
+    tier: input?.tier as Tier | undefined,
+    startedAt: typeof input?.startedAt === "number" ? input!.startedAt : t,
+    updatedAt: typeof input?.updatedAt === "number" ? input!.updatedAt : t,
+  };
+}
+
+function parseRaw(raw: string): QuizState {
+  const parsed = JSON.parse(raw);
+
+  // New envelope format
+  if (parsed && typeof parsed === "object" && "v" in parsed && "data" in parsed) {
+    const v = (parsed as any).v;
+    const data = (parsed as any).data;
+
+    if (v === 1) return normalizeQuizState(data);
+
+    // future: migrations
+    return normalizeQuizState(data);
+  }
+
+  // Legacy bare QuizState
+  return normalizeQuizState(parsed as QuizState);
 }
 
 /**
@@ -34,50 +75,42 @@ export function getOrCreateSessionId(): string {
  */
 export function loadQuizState(): QuizState {
   const sessionId = getOrCreateSessionId();
-  const now = Date.now();
+  const t = now();
 
   if (typeof window === "undefined") {
-    return { sessionId, answers: {}, startedAt: now, updatedAt: now };
+    return { sessionId, answers: {}, startedAt: t, updatedAt: t };
   }
 
   try {
     const raw = localStorage.getItem(QUIZ_STATE_KEY);
-    if (!raw) {
-      return { sessionId, answers: {}, startedAt: now, updatedAt: now };
-    }
+    if (!raw) return { sessionId, answers: {}, startedAt: t, updatedAt: t };
 
-    const parsed = JSON.parse(raw);
-
-    return {
-      sessionId: parsed?.sessionId ?? sessionId,
-      answers: (parsed?.answers ?? {}) as Answers,
-      tier: parsed?.tier as Tier | undefined,
-      startedAt: typeof parsed?.startedAt === "number" ? parsed.startedAt : now,
-      updatedAt: typeof parsed?.updatedAt === "number" ? parsed.updatedAt : now,
-    };
+    return parseRaw(raw);
   } catch {
-    return { sessionId, answers: {}, startedAt: now, updatedAt: now };
+    return { sessionId, answers: {}, startedAt: t, updatedAt: t };
   }
 }
 
 /**
  * Save full quiz state. Always stamps updatedAt and fills startedAt if missing.
+ * Writes as an envelope for future-proofing.
  */
 export function saveQuizState(state: QuizState): QuizState {
-  const now = Date.now();
+  const t = now();
   const sessionId = state.sessionId || getOrCreateSessionId();
 
-  const next: QuizState = {
+  const next = normalizeQuizState({
     ...state,
     sessionId,
-    startedAt: state.startedAt ?? now,
-    updatedAt: now,
-  };
+    startedAt: state.startedAt ?? t,
+    updatedAt: t,
+  });
 
   if (typeof window === "undefined") return next;
 
   try {
-    localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(next));
+    const payload: EnvelopeV1 = { v: STORAGE_VERSION, data: next };
+    localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(payload));
     if (next.tier) localStorage.setItem(TIER_KEY, next.tier);
   } catch {
     // ignore
@@ -123,6 +156,24 @@ export function saveAnswers(answers: Answers): QuizState {
 }
 
 /**
+ * Reset quiz to a fresh session + empty answers/tier.
+ * (Useful for testers, and for "finish -> clear" behavior.)
+ */
+export function resetQuizState(): QuizState {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(QUIZ_STATE_KEY);
+      localStorage.removeItem(TIER_KEY);
+      localStorage.removeItem(LS_STORED_QUIZ);
+      localStorage.setItem(SESSION_ID_KEY, createId());
+    } catch {
+      // ignore
+    }
+  }
+  return loadQuizState();
+}
+
+/**
  * Clear quiz answers + tier (keeps session id by default).
  */
 export function clearQuizState(keepSession = true) {
@@ -136,6 +187,29 @@ export function clearQuizState(keepSession = true) {
   } catch {
     // ignore
   }
+}
+
+/**
+ * Optional: attach helpers for debugging in dev/stage.
+ * Use in a top-level client component once:
+ *   useEffect(() => attachQuizDebugHelpers(), [])
+ */
+export function attachQuizDebugHelpers() {
+  if (typeof window === "undefined") return;
+  if (process.env.NODE_ENV === "production") return;
+
+  (window as any).__remiQuiz = {
+    loadQuizState,
+    saveQuizState,
+    saveAnswer,
+    persistTier,
+    loadAnswers,
+    saveAnswers,
+    clearQuizState,
+    resetQuizState,
+    keys: { SESSION_ID_KEY, QUIZ_STATE_KEY, TIER_KEY },
+    version: STORAGE_VERSION,
+  };
 }
 
 /* ------------------------------------------------------------------
@@ -163,10 +237,7 @@ export function getStoredQuiz(): StoredQuiz | null {
 export function setStoredQuiz(next: StoredQuiz): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(
-      LS_STORED_QUIZ,
-      JSON.stringify({ ...next, updatedAt: Date.now() })
-    );
+    localStorage.setItem(LS_STORED_QUIZ, JSON.stringify({ ...next, updatedAt: now() }));
   } catch {
     // ignore
   }
