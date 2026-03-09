@@ -44,6 +44,9 @@ export type MultiScreen = BaseScreen & {
   questionKey: string;
   options: QuizOption[];
   maxSelect?: number;
+
+  /** Optional UI hint for how to render multi options */
+  layout?: "list" | "grid";
 };
 
 export type QuizScreen = SingleScreen | MultiScreen;

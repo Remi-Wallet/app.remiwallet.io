@@ -26,7 +26,7 @@ function vibrate(pattern: number | number[]) {
       // @ts-ignore
       navigator.vibrate(pattern);
     }
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -179,12 +179,22 @@ export default function QuizStepPage() {
 
         {(screen as any).type === "multi" ? (
           <Stack spacing={2}>
-            <OptionGrid
-              options={(screen as any).options}
-              selected={Array.isArray(currentValue) ? currentValue : []}
-              maxSelect={(screen as any).maxSelect}
-              onSelect={onMultiToggle}
-            />
+            {(screen as any).layout === "list" ? (
+              <OptionList
+                mode="multi"
+                options={(screen as any).options}
+                selectedValues={Array.isArray(currentValue) ? currentValue : []}
+                maxSelect={(screen as any).maxSelect}
+                onToggle={onMultiToggle}
+              />
+            ) : (
+              <OptionGrid
+                options={(screen as any).options}
+                selected={Array.isArray(currentValue) ? currentValue : []}
+                maxSelect={(screen as any).maxSelect}
+                onSelect={onMultiToggle}
+              />
+            )}
 
             <Button
               variant="contained"
@@ -201,21 +211,6 @@ export default function QuizStepPage() {
               </Typography>
             ) : null}
 
-            <Typography
-              component={Link}
-              href="/"
-              variant="caption"
-              sx={{
-                display: "inline-block",
-                textAlign: "center",
-                color: "text.secondary",
-                opacity: 0.55,
-                textDecoration: "none",
-                "&:hover": { textDecoration: "underline", opacity: 0.75 },
-              }}
-            >
-              Restart
-            </Typography>
           </Stack>
         ) : null}
       </Box>
