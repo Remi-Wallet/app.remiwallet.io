@@ -1,5 +1,3 @@
-// theme/tokens.ts
-
 export const tokens = {
   brand: {
     name: "Remi",
@@ -25,6 +23,7 @@ export const tokens = {
         },
         guidance: {
           minWidthPx: { fullLockup: 140, wordmark: 120, icon: 28 },
+          idealHeightPx: { fullLockup: 36, wordmark: 28, icon: 28 },
           safeAreaPx: 4,
         },
       },
@@ -33,7 +32,7 @@ export const tokens = {
 
   // ---- Colors ----
   color: {
-    // Raw 
+    // Raw palette tokens
     palette: {
       navy900: "#0B2B46",
       navy800: "#0F355A",
@@ -47,11 +46,6 @@ export const tokens = {
       slate100: "#F1F5F9",
       white: "#FFFFFF",
 
-      // Jamesernet --> Cleanup and rename to generic names/labels?
-      remiPage: "#ECEAEB",
-      remiNavy: "#003D73",     // delete?
-      remiTaupe: "#9A8F97",    // delete?
-
       mint600: "#06D6A0",
       mint500: "#10B981",
       mint100: "#D1FAE5",
@@ -60,15 +54,16 @@ export const tokens = {
       red600: "#EF4444",
     },
 
-    // Semantic Tokens
+    // Semantic tokens
     semantic: {
       bg: {
         page: "#ECEAEB",
         surface: "#FFFFFF",
         surfaceMuted: "#F8FAFC",
-        footer: "#0B2B46",
         header: "#FFFFFF",
+        footer: "#0B2B46",
       },
+
       text: {
         primary: "#003D73",
         secondary: "#9A8F97",
@@ -76,23 +71,40 @@ export const tokens = {
         inverse: "#FFFFFF",
         link: "#FFFFFF",
       },
+
       border: {
         default: "#E2E8F0",
         strong: "#CBD5E1",
       },
+
       brand: {
         primary: "#06D6A0",
         primaryHover: "#10B981",
         onPrimary: "#FFFFFF",
       },
+
       state: {
         success: "#10B981",
         warning: "#F59E0B",
         error: "#EF4444",
         info: "#14466F",
       },
+
       focus: {
         ring: "rgba(6, 214, 160, 0.35)",
+      },
+
+      chrome: {
+        header: {
+          bg: "rgba(255,255,255,0.72)",
+          border: "#E2E8F0",
+        },
+        footer: {
+          bg: "#0B2B46",
+          text: "#FFFFFF",
+          link: "#FFFFFF",
+          border: "rgba(255,255,255,0.14)",
+        },
       },
     },
   },
@@ -101,10 +113,11 @@ export const tokens = {
   typography: {
     fontFamily: {
       sans:
-      'ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter, Arial, sans-serif',
+        'ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter, Arial, sans-serif',
       mono:
-      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     },
+
     weight: {
       regular: 400,
       medium: 500,
@@ -112,6 +125,7 @@ export const tokens = {
       bold: 700,
       extrabold: 800,
     },
+
     size: {
       xs: 12,
       sm: 14,
@@ -122,15 +136,27 @@ export const tokens = {
       "3xl": 36,
       "4xl": 44,
     },
+
     lineHeight: {
       tight: 1.1,
       snug: 1.25,
       normal: 1.5,
     },
+
     letterSpacing: {
       tight: "-0.02em",
       normal: "0em",
       wide: "0.02em",
+    },
+
+    brandText: {
+      header: {
+        fontSize: { xs: "1.08rem", sm: "1.12rem", md: "1.2rem" },
+        fontWeight: 800,
+        letterSpacing: "0.12em",
+        lineHeight: 1,
+        textTransform: "uppercase",
+      },
     },
   },
 
@@ -150,8 +176,8 @@ export const tokens = {
   radius: {
     xs: 8,
     sm: 12,
-    md: 16, // ✅ default borderRadius
-    lg: 20, // ✅ cards
+    md: 16,
+    lg: 20,
     xl: 28,
     pill: 999,
   },
@@ -163,7 +189,7 @@ export const tokens = {
     lg: "0 12px 30px rgba(15, 23, 42, 0.16)",
   },
 
-  // ---- Button ----
+  // ---- Component tokens ----
   component: {
     button: {
       minHeight: 58,
@@ -196,6 +222,8 @@ export const tokens = {
     contentMax: 840,
     footerMax: 1200,
     headerHeight: 64,
+    footerMinHeight: 72,
+    headerBlurPx: 10,
   },
 
   // ---- Z-index ----
@@ -204,6 +232,6 @@ export const tokens = {
     modal: 1300,
     toast: 1400,
   },
-} as const ;
+} as const;
 
 export type Tokens = typeof tokens;

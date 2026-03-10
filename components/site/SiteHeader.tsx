@@ -1,9 +1,8 @@
-// app/site/SiteHeader.tsx
-
 "use client";
 
-import Link from "next/link";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container } from "@mui/material";
+import { tokens as t } from "@/theme/tokens";
+import BrandMark from "@/components/brand/BrandMark";
 
 export default function SiteHeader() {
   return (
@@ -11,40 +10,24 @@ export default function SiteHeader() {
       component="header"
       sx={{
         width: "100%",
-        bgcolor: "rgba(255,255,255,0.55)",          // less stark than white
-        backdropFilter: "blur(10px)",               // makes it feel more “native”
-        borderBottom: "1px solid rgba(0,0,0,0.06)", // subtle definition
+        bgcolor: t.color.semantic.chrome.header.bg,
+        backdropFilter: `blur(${t.layout.headerBlurPx}px)`,
+        borderBottom: `1px solid ${t.color.semantic.chrome.header.border}`,
+        minHeight: t.layout.headerHeight,
+        zIndex: t.zIndex.header,
       }}
     >
       <Container maxWidth="lg">
         <Box
           sx={{
-            minHeight: 72,
+            minHeight: t.layout.headerHeight,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             px: { xs: 1, sm: 0 },
           }}
         >
-          <Typography
-            component={Link}
-            href="/"
-            sx={{
-              textDecoration: "none",
-              color: "#003D73",
-              fontSize: { xs: "1.08rem", sm: "1.12rem", md: "1.2rem" },
-              fontWeight: 800,
-              letterSpacing: "0.12em",
-              lineHeight: 1,
-              textTransform: "uppercase",
-              transition: "opacity 160ms ease",
-              "&:hover": {
-                opacity: 0.82,
-              },
-            }}
-          >
-            Remi
-          </Typography>
+          <BrandMark surface="header" mode="light" forceTextFallback />
         </Box>
       </Container>
     </Box>
