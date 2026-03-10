@@ -34,9 +34,9 @@ function getSummaryCopy(tier: Tier) {
       calloutTitle: "You may be missing high-value redemptions.",
       calloutBody: "Optimized users stack the right card, category, and redemption window.",
       bars: [
-        { label: "Average users", value: 0.35 },
+        { label: "You today", value: 0.35 },
         { label: "Optimized", value: 0.72, emphasis: true },
-        { label: "Fully optimized", value: 0.94 },
+        { label: "Super optimized", value: 0.94 },
       ],
     };
   }
@@ -49,9 +49,9 @@ function getSummaryCopy(tier: Tier) {
       calloutTitle: "You likely have easy wins.",
       calloutBody: "Small shifts in which card you use for big categories can add up fast.",
       bars: [
-        { label: "Average users", value: 0.35 },
+        { label: "You today", value: 0.35 },
         { label: "Optimized", value: 0.62, emphasis: true },
-        { label: "Fully optimized", value: 0.9 },
+        { label: "Super optimized", value: 0.9 },
       ],
     };
   }
@@ -63,9 +63,9 @@ function getSummaryCopy(tier: Tier) {
     calloutTitle: "Good news: most people start here.",
     calloutBody: "Remi helps you learn a simple system so you capture more rewards with less effort.",
     bars: [
-      { label: "Average users", value: 0.35, emphasis: true },
+      { label: "You today", value: 0.35, emphasis: true },
       { label: "Optimized", value: 0.65 },
-      { label: "Fully optimized", value: 0.92 },
+      { label: "Super optimized", value: 0.92 },
     ],
   };
 }
