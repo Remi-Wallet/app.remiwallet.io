@@ -58,11 +58,11 @@ export const SCREENS: Record<number, QuizScreen> = {
     progress: { current: 3, total: 6 },
     autoAdvance: true,
     options: [
-      { label: "😎 I’ve got it handled", value: "handled" },
-      { label: "🤓 I try my best", value: "try_best" },
-      { label: "😕 It’s a bit confusing", value: "confusing" },
-      { label: "😩 I know I’m leaving value", value: "leaving_value" },
-      { label: "🤷 I don’t really think about it", value: "dont_think" },
+      { label: "I’ve got it handled", value: "handled", icon:"😎" },
+      { label: "I try my best", value: "try_best", icon:"🤓" },
+      { label: "It’s a bit confusing", value: "confusing", icon:"😕" },
+      { label: "I know I’m leaving value", value: "leaving_value", icon:"😩" },
+      { label: "I don’t really think about it", value: "dont_think", icon:"🤷" },
     ],
   },
 
