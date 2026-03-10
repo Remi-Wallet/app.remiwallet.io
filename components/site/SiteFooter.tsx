@@ -1,8 +1,8 @@
-// app/site/SiteFooter.tsx
-"use client";
+// components/site/SiteFooter.tsx
 
 import * as React from "react";
 import { Box, Container, Link, Typography } from "@mui/material";
+import { tokens } from "@/theme/tokens";
 
 type SiteFooterProps = {
   year?: number;
@@ -12,15 +12,15 @@ type SiteFooterProps = {
   disclaimer?: string;
 
   /**
-   * Footer colors
+   * Optional overrides
    */
-  bgTop?: string; // main footer
-  bgBottom?: string; // disclaimer band
+  bgTop?: string;
+  bgBottom?: string;
 };
 
 export function SiteFooter(props: SiteFooterProps) {
   const year = props.year ?? new Date().getFullYear();
-  const company = props.company ?? "Remi Wallet, Inc";
+  const company = props.company ?? tokens.brand.legalName;
   const privacyHref = props.privacyHref ?? "/privacy-policy";
   const termsHref = props.termsHref ?? "/terms-of-use";
 
@@ -28,27 +28,28 @@ export function SiteFooter(props: SiteFooterProps) {
     props.disclaimer ??
     "Remi provides informational and educational content through this waitlist and beta experience only. Remi does not provide financial, tax, legal, or investment advice. Any rewards estimates, optimization insights, or product descriptions are illustrative and may change.";
 
-  // Defaults match the current stage styling
-  const bgTop = props.bgTop ?? "#0F355A";
-  const bgBottom = props.bgBottom ?? "#0A2642";
+  const bgTop = props.bgTop ?? tokens.color.semantic.chrome.footer.bg;
+  const bgBottom = props.bgBottom ?? tokens.color.semantic.chrome.footer.subBg;
 
   return (
     <Box component="footer" sx={{ width: "100%", mt: "auto" }}>
-      {/* Main footer row */}
       <Box
         sx={{
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          borderTop: `1px solid ${tokens.color.semantic.chrome.footer.border}`,
           backgroundColor: bgTop,
-          color: "rgba(255,255,255,0.92)",
+          color: tokens.color.semantic.chrome.footer.text,
         }}
       >
-        <Container maxWidth="lg">
+        <Container
+          maxWidth={false}
+          sx={{
+            maxWidth: tokens.layout.footerMax,
+            px: { xs: 2, sm: 3 },
+          }}
+        >
           <Box
             sx={{
-              px: 2,
               py: 2,
-              // Desktop: 3-column grid (left spacer | centered copyright | right-aligned links)
-              // Mobile: stacked (copyright then links)
               display: { xs: "flex", sm: "grid" },
               flexDirection: { xs: "column" },
               alignItems: "center",
@@ -59,22 +60,21 @@ export function SiteFooter(props: SiteFooterProps) {
               textAlign: { xs: "center", sm: "left" },
             }}
           >
-            {/* Spacer column so the copyright can truly sit centered while links are right-aligned */}
             <Box sx={{ display: { xs: "none", sm: "block" } }} />
 
             <Typography
               variant="body2"
               sx={{
-                fontWeight: 500,
-                letterSpacing: 0.1,
-                opacity: 0.9,
+                fontWeight: tokens.typography.weight.medium,
+                letterSpacing: tokens.typography.letterSpacing.normal,
+                color: tokens.color.semantic.chrome.footer.text,
+                opacity: 0.92,
                 justifySelf: { sm: "center" },
               }}
             >
               © {year} {company}. All rights reserved.
             </Typography>
 
-            {/* Link group */}
             <Box
               sx={{
                 display: "flex",
@@ -89,15 +89,26 @@ export function SiteFooter(props: SiteFooterProps) {
                 href={privacyHref}
                 underline="hover"
                 color="inherit"
-                sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+                sx={{
+                  fontWeight: tokens.typography.weight.semibold,
+                  whiteSpace: "nowrap",
+                  color: tokens.color.semantic.chrome.footer.link,
+                  textUnderlineOffset: "2px",
+                }}
               >
                 Privacy Policy
               </Link>
+
               <Link
                 href={termsHref}
                 underline="hover"
                 color="inherit"
-                sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+                sx={{
+                  fontWeight: tokens.typography.weight.semibold,
+                  whiteSpace: "nowrap",
+                  color: tokens.color.semantic.chrome.footer.link,
+                  textUnderlineOffset: "2px",
+                }}
               >
                 Terms of Use
               </Link>
@@ -106,16 +117,21 @@ export function SiteFooter(props: SiteFooterProps) {
         </Container>
       </Box>
 
-      {/* Sub-footer disclaimer */}
       <Box
         sx={{
           backgroundColor: bgBottom,
-          color: "rgba(255,255,255,0.78)",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          color: tokens.color.semantic.chrome.footer.subText,
+          borderTop: `1px solid ${tokens.color.semantic.chrome.footer.subBorder}`,
           py: 1.75,
         }}
       >
-        <Container maxWidth="lg">
+        <Container
+          maxWidth={false}
+          sx={{
+            maxWidth: tokens.layout.footerMax,
+            px: { xs: 2, sm: 3 },
+          }}
+        >
           <Typography
             variant="caption"
             sx={{
@@ -124,6 +140,7 @@ export function SiteFooter(props: SiteFooterProps) {
               lineHeight: 1.7,
               fontSize: "0.78rem",
               px: 2,
+              color: tokens.color.semantic.chrome.footer.subText,
             }}
           >
             {disclaimer}
@@ -134,5 +151,4 @@ export function SiteFooter(props: SiteFooterProps) {
   );
 }
 
-// Also export default so AppShell can do: import SiteFooter from "@/components/site/SiteFooter";
 export default SiteFooter;

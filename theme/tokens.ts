@@ -57,18 +57,18 @@ export const tokens = {
     // Semantic tokens
     semantic: {
       bg: {
-        page: "#ECEAEB",
+        page: "#EEFFF7",
         surface: "#FFFFFF",
         surfaceMuted: "#F8FAFC",
-        header: "#FFFFFF",
-        footer: "#0B2B46",
+        header: "#EEFFF7",
+        footer: "#052517",
       },
 
       text: {
-        primary: "#003D73",
+        primary: "#052517",
         secondary: "#9A8F97",
         muted: "#64748B",
-        inverse: "#FFFFFF",
+        inverse: "#110404",
         link: "#FFFFFF",
       },
 
@@ -78,13 +78,13 @@ export const tokens = {
       },
 
       brand: {
-        primary: "#06D6A0",
-        primaryHover: "#10B981",
+        primary: "#5CEC89",
+        primaryHover: "#5CEC89",
         onPrimary: "#FFFFFF",
       },
 
       state: {
-        success: "#10B981",
+        success: "#5CEC89",
         warning: "#F59E0B",
         error: "#EF4444",
         info: "#14466F",
@@ -100,10 +100,13 @@ export const tokens = {
           border: "#E2E8F0",
         },
         footer: {
-          bg: "#0B2B46",
-          text: "#FFFFFF",
-          link: "#FFFFFF",
+          bg: "#0B9064",
+          subBg: "#052517",
+          text: "#EEFFF7",
+          subText: "#EEFFF7",
+          link: "#EEFFF7",
           border: "rgba(255,255,255,0.14)",
+          subBorder: "rgba(255,255,255,0.06)",
         },
       },
     },

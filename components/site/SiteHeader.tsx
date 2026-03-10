@@ -1,4 +1,4 @@
-"use client";
+// components/site/SiteHEader.tsx
 
 import { Box, Container } from "@mui/material";
 import { tokens as t } from "@/theme/tokens";
@@ -17,7 +17,13 @@ export default function SiteHeader() {
         zIndex: t.zIndex.header,
       }}
     >
-      <Container maxWidth="lg">
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: t.layout.footerMax,
+          px: { xs: 2, sm: 3 },
+        }}
+      >
         <Box
           sx={{
             minHeight: t.layout.headerHeight,

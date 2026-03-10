@@ -26,7 +26,7 @@ export type QuizShellProps = {
   progress?: { current: number; total: number };
 
   /**
-   * Back is optional; you said you may remove it for now.
+   * Back is optional;
    * Keep this here for compatibility if you re-enable later.
    */
   showBack?: boolean;
