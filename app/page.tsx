@@ -1,19 +1,26 @@
-//app/page.tsx
+// app/page.tsx
 
+"use client";
 "use client";
 
 import * as React from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { alpha, Box, Button, Stack, Typography } from "@mui/material";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import { useRouter } from "next/navigation";
-import { getOrCreateSessionId, clearResultsSnapshot, clearQuizAnswersKeepSession } from "@/lib/quiz/storage";
+import {
+  getOrCreateSessionId,
+  clearResultsSnapshot,
+  clearQuizAnswersKeepSession,
+} from "@/lib/quiz/storage";
 import { track } from "@/lib/analytics/events";
 import { createTrackOnce } from "@/lib/analytics/trackOnce";
-
 
 const trackOnce = createTrackOnce(track);
 
 function ConfidenceItem(props: {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   body: string;
 }) {
@@ -26,45 +33,45 @@ function ConfidenceItem(props: {
       }}
     >
       <Box
-        sx={{
-          width: 26,
-          height: 26,
-          minWidth: 26,
+        sx={(theme) => ({
+          width: 28,
+          height: 28,
+          minWidth: 28,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           borderRadius: "999px",
-          backgroundColor: "rgba(6,214,160,0.14)",
-          color: "#06D6A0",
-          fontSize: "0.95rem",
-          fontWeight: 800,
-          lineHeight: 1,
+          backgroundColor: alpha(theme.palette.primary.main, 0.14),
+          color: theme.palette.primary.main,
           mt: "2px",
-          boxShadow: "inset 0 0 0 1px rgba(6,214,160,0.18)",
-        }}
+          boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
+          "& .MuiSvgIcon-root": {
+            fontSize: 17,
+          },
+        })}
       >
         {props.icon}
       </Box>
 
       <Box>
         <Typography
-          sx={{
+          sx={(theme) => ({
             fontSize: { xs: "1rem", sm: "1.02rem" },
             fontWeight: 700,
-            color: "#003D73",
+            color: theme.palette.text.primary,
             lineHeight: 1.35,
             mb: 0.35,
-          }}
+          })}
         >
           {props.title}
         </Typography>
 
         <Typography
-          sx={{
+          sx={(theme) => ({
             fontSize: { xs: "0.95rem", sm: "0.98rem" },
-            color: "#6F6A72",
+            color: theme.palette.text.secondary,
             lineHeight: 1.62,
-          }}
+          })}
         >
           {props.body}
         </Typography>
@@ -80,7 +87,7 @@ export default function HomePage() {
     getOrCreateSessionId();
     trackOnce("quiz_start", { source: "landing" }, "quiz_start");
     clearResultsSnapshot();
-    clearQuizAnswersKeepSession(false); //clear anwsers + results but keep sessionID
+    clearQuizAnswersKeepSession(false); // clear answers + results but keep sessionID
     router.push("/quiz/1");
   };
 
@@ -101,31 +108,37 @@ export default function HomePage() {
         }}
       >
         <Typography
-          sx={{
+          sx={(theme) => ({
             fontWeight: 800,
-            letterSpacing: "-0.025em",
-            color: "#003D73",
+            letterSpacing: theme.typography.h4?.letterSpacing ?? "-0.025em",
+            color: theme.palette.text.primary,
             fontSize: { xs: 38, sm: 52, md: 62 },
             lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
             maxWidth: 860,
             mb: 2,
-          }}
+          })}
         >
           The average American loses{" "}
-          <Box component="span" sx={{ color: "#06D6A0", fontStyle: "italic" }}>
+          <Box
+            component="span"
+            sx={(theme) => ({
+              color: theme.palette.primary.main,
+              fontStyle: "italic",
+            })}
+          >
             thousands
           </Box>{" "}
           every year in unclaimed rewards and offers.
         </Typography>
 
         <Typography
-          sx={{
-            color: "text.secondary",
+          sx={(theme) => ({
+            color: theme.palette.text.secondary,
             fontSize: { xs: 16, sm: 18 },
             lineHeight: 1.58,
             maxWidth: 720,
             mb: 3.25,
-          }}
+          })}
         >
           Take 60 seconds to see if you’re leaving value on the table.
         </Typography>
@@ -134,21 +147,16 @@ export default function HomePage() {
           <Button
             fullWidth
             variant="contained"
+            color="primary"
             size="large"
             onClick={onStart}
             sx={{
-              height: 60,
-              borderRadius: 3,
-              fontWeight: 700,
               fontSize: "1rem",
-              textTransform: "none",
-              bgcolor: "#06D6A0",
-              boxShadow: "0 10px 24px rgba(0,0,0,0.10)",
-              "&:hover": { bgcolor: "#06D6A0", filter: "brightness(0.98)" },
+              "&:hover": { filter: "brightness(0.98)" },
               "&:active": { transform: "translateY(1px)" },
             }}
           >
-            Start
+            See My Results
           </Button>
 
           <Stack
@@ -159,17 +167,17 @@ export default function HomePage() {
             }}
           >
             <ConfidenceItem
-              icon="🛡️"
+              icon={<ShieldOutlinedIcon />}
               title="Built with privacy in mind"
               body="This early quiz is designed to collect minimal information while helping us learn what matters most to users like you."
             />
             <ConfidenceItem
-              icon="👤"
+              icon={<PersonOutlineIcon />}
               title="No personal details upfront"
               body="You can answer the core questions before sharing your name, email, or anything else that identifies you."
             />
             <ConfidenceItem
-              icon="✨"
+              icon={<InsightsOutlinedIcon />}
               title="Quick insight, no commitment"
               body="In about 60 seconds, you’ll get a clearer sense of how much value you may be missing from your current card setup."
             />

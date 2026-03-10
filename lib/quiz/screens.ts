@@ -23,7 +23,7 @@ export const SCREENS: Record<number, QuizScreen> = {
     title: "How many credit cards do you have?",
     subtitle: "Include cards you keep open, even if you don’t use them often.",
     questionKey: "q_cards",
-    progress: { current: 1, total: 6 },
+    progress: { current: 1, total: 7 },
     autoAdvance: true,
     options: [
       { label: "1", value: "1" },
@@ -36,10 +36,10 @@ export const SCREENS: Record<number, QuizScreen> = {
   2: {
     step: 2,
     type: "single",
-    title: "Roughly how much do you put on credit cards per month?",
+    title: "Roughly how much do you spend on credit cards per month?",
     subtitle: "A quick estimate is perfect.",
     questionKey: "q_spend",
-    progress: { current: 2, total: 6 },
+    progress: { current: 2, total: 7 },
     autoAdvance: true,
     options: [
       { label: "Under $1,000", value: "under_1k" },
@@ -55,7 +55,7 @@ export const SCREENS: Record<number, QuizScreen> = {
     title: "How do you feel about how you’re using your rewards?",
     subtitle: "No right answer.",
     questionKey: "q_feel",
-    progress: { current: 3, total: 6 },
+    progress: { current: 3, total: 7 },
     autoAdvance: true,
     options: [
       { label: "I’ve got it handled", value: "handled", icon:"😎" },
@@ -73,7 +73,7 @@ export const SCREENS: Record<number, QuizScreen> = {
     title: "Where does most of your spending go?",
     subtitle: "Select up to 3.",
     questionKey: "q_spend_categories",
-    progress: { current: 4, total: 6 }, // advanced segment progress
+    progress: { current: 4, total: 7 }, // advanced segment progress
     maxSelect: 3,
     options: [
       { label: "Dining", value: "dining", icon: "🍽️" },
@@ -92,7 +92,7 @@ export const SCREENS: Record<number, QuizScreen> = {
     subtitle: "Select all that apply (or none).",
     questionKey: "q_travel_cards",
     maxSelect: 6,
-    progress: { current: 5, total: 6 },
+    progress: { current: 5, total: 7 },
     options: travelCards,
   },
 
@@ -103,7 +103,7 @@ export const SCREENS: Record<number, QuizScreen> = {
     subtitle: "Select all that apply (or none).",
     questionKey: "q_everyday_cards",
     maxSelect: 6,
-    progress: { current: 6, total: 6 },
+    progress: { current: 6, total: 7 },
     options: everydayCards,
   },
 };
