@@ -1,8 +1,11 @@
+// app/components/quiz/QuizShell.tsx
+
 "use client";
 
 import * as React from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { ProgressBar } from "@/components/quiz/ProgressBar";
+import PageContainer from "@/components/layouts/PageContainer";
 
 export type QuizShellVariant = "hero" | "quiz";
 
@@ -54,30 +57,20 @@ export function QuizShell({
         fontWeight: 800,
         letterSpacing: "-0.02em",
         lineHeight: 1.06,
-        // quiz steps: slightly smaller than landing
         fontSize: { xs: 30, sm: 40, md: 46 },
       };
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Container
-        maxWidth={false}
-        sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          px: { xs: 2, sm: 3 },
-          py: { xs: 3, sm: 5 },
-        }}
+      <PageContainer
+        maxWidth={isHero ? 980 : 760}
+        py={{ xs: 3, sm: 5 }}
       >
-        {/* Decision A: no outer “card” — keep content in a consistent column */}
         <Box
           sx={{
             width: "100%",
-            maxWidth: isHero ? 980 : 760,
           }}
         >
-          {/* Optional back (safe to keep, can disable by not passing showBack) */}
           {showBack ? (
             <Box
               onClick={onBack}
@@ -102,7 +95,6 @@ export function QuizShell({
             </Box>
           ) : null}
 
-          {/* Progress (quiz only) */}
           {variant === "quiz" && progress ? (
             <Box sx={{ mb: 2 }}>
               <ProgressBar current={progress.current} total={progress.total} />
@@ -131,7 +123,7 @@ export function QuizShell({
 
           <Box sx={{ mt: title || subtitle ? 3 : 0 }}>{children}</Box>
         </Box>
-      </Container>
+      </PageContainer>
     </Box>
   );
 }
