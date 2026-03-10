@@ -118,7 +118,7 @@ export default function HomePage() {
             mb: 2,
           })}
         >
-          The average American loses{" "}
+          You could be losing {" "}
           <Box
             component="span"
             sx={(theme) => ({
