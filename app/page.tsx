@@ -1,7 +1,6 @@
 // app/page.tsx
 
 "use client";
-"use client";
 
 import * as React from "react";
 import { alpha, Box, Button, Stack, Typography } from "@mui/material";
@@ -87,7 +86,7 @@ export default function HomePage() {
     getOrCreateSessionId();
     trackOnce("quiz_start", { source: "landing" }, "quiz_start");
     clearResultsSnapshot();
-    clearQuizAnswersKeepSession(false); // clear answers + results but keep sessionID
+    clearQuizAnswersKeepSession(false);
     router.push("/quiz/1");
   };
 
@@ -104,7 +103,7 @@ export default function HomePage() {
       <Box
         sx={{
           width: "100%",
-          maxWidth: 920,
+          maxWidth: 760,
         }}
       >
         <Typography
@@ -114,36 +113,45 @@ export default function HomePage() {
             color: theme.palette.text.primary,
             fontSize: { xs: 38, sm: 52, md: 62 },
             lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
-            maxWidth: 860,
+            maxWidth: 760,
             mb: 2,
+            textAlign: "left",
           })}
         >
-          You could be losing {" "}
-          <Box
-            component="span"
-            sx={(theme) => ({
-              color: theme.palette.primary.main,
-              fontStyle: "italic",
-            })}
-          >
-            thousands
-          </Box>{" "}
-          every year in unclaimed rewards and offers.
+          You could be losing
+          <Box sx={{ display: { xs: "inline", sm: "block" } }}>
+            {" "}
+            <Box
+              component="span"
+              sx={(theme) => ({
+                color: theme.palette.primary.main,
+                fontStyle: "italic",
+              })}
+            >
+              thousands
+            </Box>{" "}
+            every year in
+          </Box>
+          <Box sx={{ display: { xs: "inline", sm: "block" } }}>
+            {" "}
+            unclaimed rewards and offers.
+          </Box>
         </Typography>
 
         <Typography
           sx={(theme) => ({
             color: theme.palette.text.secondary,
-            fontSize: { xs: 16, sm: 18 },
-            lineHeight: 1.58,
-            maxWidth: 720,
-            mb: 3.25,
+            fontSize: { xs: 18, sm: 20 },
+            lineHeight: 1.5,
+            maxWidth: 620,
+            mb: 3.5,
+            textAlign: "left",
           })}
         >
           Take 60 seconds to see if you’re leaving value on the table.
         </Typography>
 
-        <Box sx={{ maxWidth: 720 }}>
+        <Box sx={{ width: "100%" }}>
           <Button
             fullWidth
             variant="contained"
@@ -162,8 +170,8 @@ export default function HomePage() {
           <Stack
             spacing={2.25}
             sx={{
-              mt: 3.25,
-              maxWidth: 600,
+              mt: 3.75,
+              maxWidth: 620,
             }}
           >
             <ConfidenceItem
