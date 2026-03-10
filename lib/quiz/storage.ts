@@ -4,11 +4,7 @@ import type { Answers, QuizState, Tier } from "./types";
 
 export const SESSION_ID_KEY = "remi_session_id";
 export const QUIZ_STATE_KEY = "remi_quiz_state";
-export const TIER_KEY = "remi_tier";
 export const RESULTS_SNAPSHOT_KEY = "remi_results_snapshot";
-
-// legacy compat key (only used if machine.ts still references it)
-const LS_STORED_QUIZ = "remi_quiz_stored_v1";
 
 const STORAGE_VERSION = 1;
 type EnvelopeV1 = { v: 1; data: QuizState };
@@ -32,7 +28,7 @@ function createId(): string {
 }
 
 /**
- * Session ID
+ * Session ID (stable across runs unless resetQuizState is used)
  */
 export function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "server";
@@ -53,45 +49,39 @@ function normalizeQuizState(input: Partial<QuizState> | null | undefined): QuizS
     sessionId,
     answers: (input?.answers ?? {}) as Answers,
     tier: input?.tier as Tier | undefined,
-    startedAt: typeof input?.startedAt === "number" ? input!.startedAt : t,
-    updatedAt: typeof input?.updatedAt === "number" ? input!.updatedAt : t,
+    startedAt: typeof input?.startedAt === "number" ? input.startedAt : t,
+    updatedAt: typeof input?.updatedAt === "number" ? input.updatedAt : t,
   };
 }
 
 function parseRaw(raw: string): QuizState {
   const parsed = JSON.parse(raw);
 
-  // New envelope format
+  // Envelope format
   if (parsed && typeof parsed === "object" && "v" in parsed && "data" in parsed) {
     const v = (parsed as any).v;
     const data = (parsed as any).data;
-
     if (v === 1) return normalizeQuizState(data);
-
-    // future: migrations
+    // future migrations:
     return normalizeQuizState(data);
   }
 
-  // Legacy bare QuizState
+  // Legacy bare state
   return normalizeQuizState(parsed as QuizState);
 }
 
 /**
  * Load full quiz state from localStorage.
- * Always returns a valid QuizState (sessionId required).
  */
 export function loadQuizState(): QuizState {
   const sessionId = getOrCreateSessionId();
   const t = now();
 
-  if (typeof window === "undefined") {
-    return { sessionId, answers: {}, startedAt: t, updatedAt: t };
-  }
+  if (typeof window === "undefined") return { sessionId, answers: {}, startedAt: t, updatedAt: t };
 
   try {
     const raw = localStorage.getItem(QUIZ_STATE_KEY);
     if (!raw) return { sessionId, answers: {}, startedAt: t, updatedAt: t };
-
     return parseRaw(raw);
   } catch {
     return { sessionId, answers: {}, startedAt: t, updatedAt: t };
@@ -99,8 +89,7 @@ export function loadQuizState(): QuizState {
 }
 
 /**
- * Save full quiz state. Always stamps updatedAt and fills startedAt if missing.
- * Writes as an envelope for future-proofing.
+ * Save full quiz state (enveloped).
  */
 export function saveQuizState(state: QuizState): QuizState {
   const t = now();
@@ -118,7 +107,6 @@ export function saveQuizState(state: QuizState): QuizState {
   try {
     const payload: EnvelopeV1 = { v: STORAGE_VERSION, data: next };
     localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(payload));
-    if (next.tier) localStorage.setItem(TIER_KEY, next.tier);
   } catch {
     // ignore
   }
@@ -131,47 +119,46 @@ export function saveQuizState(state: QuizState): QuizState {
  */
 export function saveAnswer(questionKey: string, value: string | string[]): QuizState {
   const state = loadQuizState();
-  const next: QuizState = {
+  return saveQuizState({
     ...state,
     answers: { ...state.answers, [questionKey]: value },
-  };
-  return saveQuizState(next);
+  });
 }
 
 /**
- * Persist tier to both QuizState and a dedicated key for easy access.
+ * Persist tier in QuizState.
  */
 export function persistTier(tier: Tier): QuizState {
   const state = loadQuizState();
-  const next: QuizState = { ...state, tier };
-  return saveQuizState(next);
+  return saveQuizState({ ...state, tier });
 }
 
 /**
- * Convenience: get just the answers.
+ * Clear answers but keep sessionId. Optionally clear tier too.
+ * Use this when starting a new run (recommended).
  */
-export function loadAnswers(): Answers {
-  return loadQuizState().answers;
-}
-
-/**
- * Convenience: overwrite answers (rare, but handy for restores).
- */
-export function saveAnswers(answers: Answers): QuizState {
+export function clearQuizAnswersKeepSession(keepTier = false): QuizState {
   const state = loadQuizState();
-  return saveQuizState({ ...state, answers });
+  const t = now();
+  
+  return saveQuizState({
+    ...state,
+    answers: {},
+    tier: keepTier ? state.tier : undefined,
+    startedAt: t, //reset start time
+    updatedAt: t,
+  });
 }
 
 /**
- * Reset quiz to a fresh session + empty answers/tier.
- * (Useful for testers, and for "finish -> clear" behavior.)
+ * Reset quiz state AND generate a new sessionId.
+ * Use only if you explicitly want a fresh analytics identity per run.
  */
 export function resetQuizState(): QuizState {
   if (typeof window !== "undefined") {
     try {
+      clearResultsSnapshot();
       localStorage.removeItem(QUIZ_STATE_KEY);
-      localStorage.removeItem(TIER_KEY);
-      localStorage.removeItem(LS_STORED_QUIZ);
       localStorage.setItem(SESSION_ID_KEY, createId());
     } catch {
       // ignore
@@ -180,28 +167,15 @@ export function resetQuizState(): QuizState {
   return loadQuizState();
 }
 
-/**
- * Clear quiz answers + tier (keeps session id by default).
- */
-export function clearQuizState(keepSession = true) {
-  if (typeof window === "undefined") return;
+/* ---------------------------
+ * Results snapshot (sessionStorage)
+ * --------------------------- */
 
-  try {
-    localStorage.removeItem(QUIZ_STATE_KEY);
-    localStorage.removeItem(TIER_KEY);
-    localStorage.removeItem(LS_STORED_QUIZ);
-    if (!keepSession) localStorage.removeItem(SESSION_ID_KEY);
-  } catch {
-    // ignore
-  }
-}
 export function saveResultsSnapshot(snapshot: ResultsSnapshot) {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(RESULTS_SNAPSHOT_KEY, JSON.stringify(snapshot));
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 export function loadResultsSnapshot(): ResultsSnapshot | null {
@@ -218,30 +192,11 @@ export function clearResultsSnapshot() {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.removeItem(RESULTS_SNAPSHOT_KEY);
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 /**
- * Clear answers but keep sessionId so analytics correlation remains intact.
- * This is the “finish -> clear answers” behavior.
- */
-export function clearQuizAnswersKeepSession(keepTier = true): QuizState {
-  const state = loadQuizState();
-  const next: QuizState = {
-    ...state,
-    answers: {},
-    tier: keepTier ? state.tier : undefined,
-    updatedAt: now(),
-  };
-  return saveQuizState(next);
-}
-
-/**
- * Optional: attach helpers for debugging in dev/stage.
- * Use in a top-level client component once:
- *   useEffect(() => attachQuizDebugHelpers(), [])
+ * Optional: attach helpers for dev/stage debugging.
  */
 export function attachQuizDebugHelpers() {
   if (typeof window === "undefined") return;
@@ -252,42 +207,12 @@ export function attachQuizDebugHelpers() {
     saveQuizState,
     saveAnswer,
     persistTier,
-    loadAnswers,
-    saveAnswers,
-    clearQuizState,
+    clearQuizAnswersKeepSession,
     resetQuizState,
-    keys: { SESSION_ID_KEY, QUIZ_STATE_KEY, TIER_KEY },
+    saveResultsSnapshot,
+    loadResultsSnapshot,
+    clearResultsSnapshot,
+    keys: { SESSION_ID_KEY, QUIZ_STATE_KEY, RESULTS_SNAPSHOT_KEY },
     version: STORAGE_VERSION,
   };
-}
-
-/* ------------------------------------------------------------------
- * Compatibility layer for older machine.ts imports
- * ------------------------------------------------------------------ */
-
-export type StoredQuiz = {
-  sessionId: string;
-  answers: Answers;
-  tier?: Tier;
-  startedAt?: number;
-  updatedAt?: number;
-};
-
-export function getStoredQuiz(): StoredQuiz | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(LS_STORED_QUIZ);
-    return raw ? (JSON.parse(raw) as StoredQuiz) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setStoredQuiz(next: StoredQuiz): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LS_STORED_QUIZ, JSON.stringify({ ...next, updatedAt: now() }));
-  } catch {
-    // ignore
-  }
 }

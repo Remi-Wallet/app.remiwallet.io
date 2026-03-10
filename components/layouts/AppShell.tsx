@@ -1,9 +1,13 @@
+// app/components/layouts/AppShell.tsx
+
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
+import { attachQuizDebugHelpers } from "@/lib/quiz/storage";
 
 function formatEnvLabel(env: string) {
   if (!env) return "Unknown";
@@ -14,6 +18,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const env = process.env.NEXT_PUBLIC_APP_ENV || "local";
   const isProd = env === "prod";
   const envLabel = formatEnvLabel(env);
+
+  // Attach storage debug helpers in non-prod (stage/local/dev)
+  useEffect(() => {
+    if (!isProd) attachQuizDebugHelpers();
+  }, [isProd]);
 
   const debugItems = [
     { label: "Env", value: envLabel },
