@@ -1,4 +1,4 @@
-// components/site/SiteHEader.tsx
+// components/site/SiteHeader.tsx
 
 import { Box, Container } from "@mui/material";
 import { tokens as t } from "@/theme/tokens";
