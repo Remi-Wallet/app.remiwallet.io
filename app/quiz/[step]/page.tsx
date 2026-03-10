@@ -4,7 +4,6 @@
 
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Box, Button, Stack, Typography } from "@mui/material";
 
@@ -14,19 +13,21 @@ import { OptionGrid } from "@/components/quiz/OptionGrid";
 
 import { screenByStep } from "@/lib/quiz/screens";
 import { loadQuizState, saveAnswer, persistTier } from "@/lib/quiz/storage";
-import type { Answers, Tier } from "@/lib/quiz/types";
-import {
-  computeTierScore as computeScore,
-  computeTierFromAnswers as computeTier,
-} from "@/lib/quiz/scoring";
+import type { Answers } from "@/lib/quiz/types";
+import { computeTierFromAnswers as computeTier } from "@/lib/quiz/scoring";
+
+import { track } from "@/lib/analytics/events";
+import { createTrackOnce } from "@/lib/analytics/trackOnce";
+import { debugLog } from "@/lib/debug/log";
+
+const trackOnce = createTrackOnce(track);
 
 function vibrate(pattern: number | number[]) {
   try {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      // @ts-ignore
-      navigator.vibrate(pattern);
+      navigator.vibrate(pattern as any);
     }
-  } catch { }
+  } catch {}
 }
 
 /**
@@ -40,18 +41,19 @@ function nextRouteForStep(step: number, answers: Answers) {
   if (step === 3) {
     const tier = computeTier(answers);
     persistTier(tier);
+
+    track("tier_assigned", { tier, step: 3 });
+    debugLog("quiz", "TIER_ASSIGNED", { tier, step: 3 });
+
     return tier === "C" ? "/quiz/results" : "/quiz/4";
   }
   if (step === 6) return "/quiz/results";
   return `/quiz/${step + 1}`;
 }
 
-function toProgress(
-  screen: any
-): { current: number; total: number } | undefined {
+function toProgress(screen: any): { current: number; total: number } | undefined {
   if (!screen) return undefined;
 
-  // Older style: progress object already present
   if (
     screen.progress &&
     typeof screen.progress.current === "number" &&
@@ -60,7 +62,6 @@ function toProgress(
     return screen.progress;
   }
 
-  // Newer style: showProgress + progressCurrent/Total
   if (
     screen.showProgress &&
     typeof screen.progressCurrent === "number" &&
@@ -107,15 +108,28 @@ export default function QuizStepPage() {
   const questionKey =
     ((screen as any).questionKey ?? (screen as any).key) as string | undefined;
 
-  if (process.env.NODE_ENV !== "production") {
-    // Helpful proof log
-    // eslint-disable-next-line no-console
-    console.log("SCREEN_PROOF", stepNum, (screen as any)?.type, (screen as any)?.title, questionKey);
-  }
+  // Debug + analytics: step view (track once to avoid StrictMode double fire)
+  useEffect(() => {
+    debugLog("quiz", "SCREEN_VIEW", {
+      stepNum,
+      type: (screen as any)?.type,
+      title: (screen as any)?.title,
+      questionKey,
+    });
 
-  const currentValue = questionKey
-    ? (state.answers as any)?.[questionKey]
-    : undefined;
+    trackOnce(
+      "step_view",
+      {
+        step: stepNum,
+        type: (screen as any)?.type,
+        questionKey,
+      },
+      `step_${stepNum}`
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepNum, questionKey]);
+
+  const currentValue = questionKey ? (state.answers as any)?.[questionKey] : undefined;
 
   // Allow empty selection on travel + everyday card steps (now 5 & 6)
   const allowEmpty = stepNum === 5 || stepNum === 6;
@@ -127,6 +141,9 @@ export default function QuizStepPage() {
     if ((screen as any).type !== "single" || !questionKey) return;
 
     vibrate(10);
+
+    debugLog("quiz", "ANSWER_SELECTED_SINGLE", { step: stepNum, questionKey, value });
+    track("answer_selected", { step: stepNum, questionKey, value });
 
     const next = saveAnswer(questionKey, value);
     setState(next);
@@ -151,13 +168,30 @@ export default function QuizStepPage() {
 
     vibrate(has ? 8 : 12);
 
+    debugLog("quiz", "ANSWER_SELECTED_MULTI", {
+      step: stepNum,
+      questionKey,
+      value,
+      selectedCount: nextVals.length,
+    });
+
+    track("answer_selected", {
+      step: stepNum,
+      questionKey,
+      value,
+      mode: "multi",
+      selectedCount: nextVals.length,
+    });
+
     const next = saveAnswer(questionKey, nextVals);
     setState(next);
   };
 
   const onContinueMulti = () => {
-    // safest: read from storage to ensure latest values
     const latest = loadQuizState();
+    debugLog("quiz", "MULTI_CONTINUE", { step: stepNum, questionKey, selectedCount });
+    track("multi_continue", { step: stepNum, questionKey, selectedCount });
+
     router.push(nextRouteForStep(stepNum, latest.answers as Answers));
   };
 
@@ -210,7 +244,6 @@ export default function QuizStepPage() {
                 Select up to {(screen as any).maxSelect}.
               </Typography>
             ) : null}
-
           </Stack>
         ) : null}
       </Box>

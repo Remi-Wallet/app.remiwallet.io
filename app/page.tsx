@@ -6,6 +6,11 @@ import * as React from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getOrCreateSessionId, clearResultsSnapshot, clearQuizAnswersKeepSession } from "@/lib/quiz/storage";
+import { track } from "@/lib/analytics/events";
+import { createTrackOnce } from "@/lib/analytics/trackOnce";
+
+
+const trackOnce = createTrackOnce(track);
 
 function ConfidenceItem(props: {
   icon: string;
@@ -73,6 +78,7 @@ export default function HomePage() {
 
   const onStart = () => {
     getOrCreateSessionId();
+    trackOnce("quiz_start", { source: "landing" }, "quiz_start");
     clearResultsSnapshot();
     clearQuizAnswersKeepSession(false); //clear anwsers + results but keep sessionID
     router.push("/quiz/1");

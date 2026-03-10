@@ -1,5 +1,7 @@
 // lib/analytics/events.ts
 
+import { debugLog } from "@/lib/debug/log";
+
 export type RemiEventName =
   | "quiz_start"
   | "step_view"
@@ -36,6 +38,7 @@ function safeReadTier() {
   }
 }
 
+
 export function track(event: RemiEventName, payload: RemiEventPayload = {}) {
   const base = {
     ts: nowIso(),
@@ -47,16 +50,38 @@ export function track(event: RemiEventName, payload: RemiEventPayload = {}) {
 
   const record = { ...base, ...payload };
 
-  // Console output (structured)
-  // eslint-disable-next-line no-console
-  console.log("[remi:event]", record);
+  // Console output (structured, gated by env)
+  debugLog("event", event, record);
 
   // Optional: keep a local buffer for debugging
   try {
-    const key = "remi_event_buffer";
-    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    const existing = JSON.parse(localStorage.getItem(EVENT_BUFFER_KEY) || "[]");
     existing.push(record);
-    localStorage.setItem(key, JSON.stringify(existing.slice(-200)));
+    localStorage.setItem(EVENT_BUFFER_KEY, JSON.stringify(existing.slice(-200)));
+  } catch {
+    // ignore
+  }
+}
+
+// ---- Event buffer helpers (dev/stage debugging) ----
+
+export type RemiEventRecord = Record<string, unknown>;
+
+const EVENT_BUFFER_KEY = "remi_event_buffer";
+
+export function getEventBuffer(): RemiEventRecord[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(EVENT_BUFFER_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function clearEventBuffer() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(EVENT_BUFFER_KEY);
   } catch {
     // ignore
   }
