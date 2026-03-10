@@ -1,8 +1,14 @@
-// app/cookie-policy/page.tsx
+// app/terms-of-use/page.tsx
 
-"use client";
-
+import type { Metadata } from "next";
 import { FullTextPageLayout } from "@/components/layouts/FullTextPageLayout";
+import { buildMetadata } from "@/lib/site/metadata";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Cookie Policy",
+  description: "Read the Cookie Policy for Remi Wallet, Inc.",
+  path: "/cookie-policy",
+});
 
 export default function CookiePolicyPage() {
   return (

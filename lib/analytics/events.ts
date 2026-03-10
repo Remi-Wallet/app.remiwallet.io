@@ -1,5 +1,21 @@
 // lib/analytics/events.ts
 
+/**
+ * Analytics architecture
+ *
+ * track()
+ * - Core analytics transport.
+ * - Responsible for building the event record, logging/debugging,
+ *   buffering locally, and pushing into GTM/dataLayer.
+ * - Should be called for every real event.
+ *
+ * trackOnce()
+ * - A wrapper used at the call site (pages/components) when an event
+ *   should only fire once per browser session / route view.
+ * - Useful for events like: quiz_start, step_view
+ * - Not appropriate for repeatable user actions like: answer_selected
+ */
+
 import { debugLog } from "@/lib/debug/log";
 
 export type RemiEventName =

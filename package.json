@@ -17,6 +17,7 @@
     "@mui/material-nextjs": "^7.3.8",
     "@mui/system": "^5.18.0",
     "@mui/utils": "^5.17.1",
+    "@next/third-parties": "^16.1.6",
     "aws-amplify": "^6.6.6",
     "next": "14.2.10",
     "react": "^18",

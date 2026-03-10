@@ -1,8 +1,15 @@
 // app/terms-of-use/page.tsx
 
-"use client";
-
+import type { Metadata } from "next";
 import { FullTextPageLayout } from "@/components/layouts/FullTextPageLayout";
+import { buildMetadata } from "@/lib/site/metadata";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Terms of Use",
+  description: "Read the Terms of Use for Remi Wallet, Inc.",
+  path: "/terms-of-use",
+});
+
 
 export default function TermsOfUsePage() {
   return (

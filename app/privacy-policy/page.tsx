@@ -1,8 +1,14 @@
 // app/privacy-policy/page.tsx
 
-"use client";
-
+import type { Metadata } from "next";
 import { FullTextPageLayout } from "@/components/layouts/FullTextPageLayout";
+import { buildMetadata } from "@/lib/site/metadata";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Privacy Policy",
+  description: "Read the Privacy Policy for Remi Wallet, Inc.",
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   return (
@@ -22,6 +28,7 @@ export default function PrivacyPolicyPage() {
       <p>
         By using the Service, you acknowledge the practices described in this Privacy Policy.
       </p>
+
       <h2>1. Information We Collect</h2>
       <p>We may collect the following categories of information:</p>
       <ul>
@@ -44,11 +51,13 @@ export default function PrivacyPolicyPage() {
           technologies, including information used to preserve progress or session state
         </li>
       </ul>
+
       <p>
         At this stage, our public waitlist and quiz experience is designed to collect limited
         information. We do not ask users in this flow to provide full payment card numbers,
         bank login credentials, or other highly sensitive financial account access information.
       </p>
+
       <h2>2. How We Use Information</h2>
       <p>We may use collected information to:</p>
       <ul>
@@ -67,6 +76,7 @@ export default function PrivacyPolicyPage() {
         <li>Comply with legal obligations and maintain internal records</li>
         <li>Create aggregated or de-identified insights that do not reasonably identify you</li>
       </ul>
+
       <h2>3. How We Share Information</h2>
       <p>We do not sell your personal information.</p>
       <p>We may share information:</p>
@@ -83,10 +93,12 @@ export default function PrivacyPolicyPage() {
         </li>
         <li>With your direction or consent</li>
       </ul>
+
       <p>
         We may also use or disclose aggregated or de-identified information that does not
         reasonably identify an individual.
       </p>
+
       <h2>4. Cookies, Local Storage, and Analytics</h2>
       <p>
         We may use cookies, local storage, analytics tools, and similar technologies to keep
@@ -94,6 +106,7 @@ export default function PrivacyPolicyPage() {
         and improve the experience. For more details, see our{" "}
         <a href="/cookie-policy">Cookie Policy</a>.
       </p>
+
       <h2>5. Data Retention</h2>
       <p>
         We retain information for as long as reasonably necessary for the purposes described
@@ -101,6 +114,7 @@ export default function PrivacyPolicyPage() {
         improve the product, comply with legal obligations, resolve disputes, and enforce
         our agreements.
       </p>
+
       <h2>6. Data Security</h2>
       <p>
         We use reasonable administrative, technical, and organizational safeguards designed
@@ -111,11 +125,13 @@ export default function PrivacyPolicyPage() {
         However, no method of transmission over the internet or method of electronic storage
         is completely secure, and we cannot guarantee absolute security.
       </p>
+
       <h2>7. Children’s Privacy</h2>
       <p>
         The Service is not intended for children under 18, and we do not knowingly collect
         personal information from children under 18 through this waitlist or beta experience.
       </p>
+
       <h2>8. Your Choices</h2>
       <p>
         You may opt out of promotional emails by using the unsubscribe link in those messages,
@@ -130,11 +146,13 @@ export default function PrivacyPolicyPage() {
         You can also control certain cookies or local storage through your browser or device
         settings, though disabling some technologies may affect how the Service functions.
       </p>
+
       <h2>9. Third-Party Links and Services</h2>
       <p>
         The Service may contain links to third-party websites, products, or services. We are
         not responsible for the privacy practices, content, or policies of those third parties.
       </p>
+
       <h2>10. U.S. State Privacy Rights</h2>
       <p>
         Depending on your jurisdiction, you may have certain privacy rights under applicable
@@ -150,6 +168,7 @@ export default function PrivacyPolicyPage() {
         We may update this Privacy Policy from time to time. The updated version will be
         effective when posted with a revised “Last updated” date.
       </p>
+
       <h2>12. Contact</h2>
       <p>
         If you have questions about this Privacy Policy or our data practices, please contact
