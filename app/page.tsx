@@ -5,8 +5,8 @@
 
 import * as React from "react";
 import { alpha, Box, Button, Stack, Typography } from "@mui/material";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import { useRouter } from "next/navigation";
 import {
@@ -167,19 +167,19 @@ export default function HomePage() {
             }}
           >
             <ConfidenceItem
-              icon={<ShieldOutlinedIcon />}
-              title="Built with privacy in mind"
-              body="This early quiz is designed to collect minimal information while helping us learn what matters most to users like you."
+              icon={<AccessTimeOutlinedIcon />}
+              title="Fast and free"
+              body="It only takes a few quick taps to get your personalized result."
             />
             <ConfidenceItem
-              icon={<PersonOutlineIcon />}
-              title="No personal details upfront"
-              body="You can answer the core questions before sharing your name, email, or anything else that identifies you."
+              icon={<VisibilityOffOutlinedIcon />}
+              title="No contact info required"
+              body="You can see your results before sharing your name, email, or anything else that identifies you."
             />
             <ConfidenceItem
               icon={<InsightsOutlinedIcon />}
-              title="Quick insight, no commitment"
-              body="In about 60 seconds, you’ll get a clearer sense of how much value you may be missing from your current card setup."
+              title="Results tailored to you"
+              body="We use your answers to tailor results to your spending habits and card setup."
             />
           </Stack>
         </Box>
