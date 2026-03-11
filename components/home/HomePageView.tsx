@@ -9,187 +9,197 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import { useRouter } from "next/navigation";
 import {
-    getOrCreateSessionId,
-    clearResultsSnapshot,
-    clearQuizAnswersKeepSession,
+  getOrCreateSessionId,
+  clearResultsSnapshot,
+  clearQuizAnswersKeepSession,
 } from "@/lib/quiz/storage";
+import { ensureQuizSessionStarted } from "@/lib/data/quizPersistence";
 import { track } from "@/lib/analytics/events";
 import { createTrackOnce } from "@/lib/analytics/trackOnce";
 
 const trackOnce = createTrackOnce(track);
 
 function ConfidenceItem(props: {
-    icon: React.ReactNode;
-    title: string;
-    body: string;
+  icon: React.ReactNode;
+  title: string;
+  body: string;
 }) {
-    return (
-        <Box
-            sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 1.75,
-            }}
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 1.75,
+      }}
+    >
+      <Box
+        sx={(theme) => ({
+          width: 28,
+          height: 28,
+          minWidth: 28,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "999px",
+          backgroundColor: alpha(theme.palette.primary.main, 0.14),
+          color: theme.palette.primary.main,
+          mt: "2px",
+          boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
+          "& .MuiSvgIcon-root": {
+            fontSize: 17,
+          },
+        })}
+      >
+        {props.icon}
+      </Box>
+
+      <Box>
+        <Typography
+          sx={(theme) => ({
+            fontSize: { xs: "1rem", sm: "1.02rem" },
+            fontWeight: 700,
+            color: theme.palette.text.primary,
+            lineHeight: 1.35,
+            mb: 0.35,
+          })}
         >
-            <Box
-                sx={(theme) => ({
-                    width: 28,
-                    height: 28,
-                    minWidth: 28,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: "999px",
-                    backgroundColor: alpha(theme.palette.primary.main, 0.14),
-                    color: theme.palette.primary.main,
-                    mt: "2px",
-                    boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
-                    "& .MuiSvgIcon-root": {
-                        fontSize: 17,
-                    },
-                })}
-            >
-                {props.icon}
-            </Box>
+          {props.title}
+        </Typography>
 
-            <Box>
-                <Typography
-                    sx={(theme) => ({
-                        fontSize: { xs: "1rem", sm: "1.02rem" },
-                        fontWeight: 700,
-                        color: theme.palette.text.primary,
-                        lineHeight: 1.35,
-                        mb: 0.35,
-                    })}
-                >
-                    {props.title}
-                </Typography>
-
-                <Typography
-                    sx={(theme) => ({
-                        fontSize: { xs: "0.95rem", sm: "0.98rem" },
-                        color: theme.palette.text.secondary,
-                        lineHeight: 1.62,
-                    })}
-                >
-                    {props.body}
-                </Typography>
-            </Box>
-        </Box>
-    );
+        <Typography
+          sx={(theme) => ({
+            fontSize: { xs: "0.95rem", sm: "0.98rem" },
+            color: theme.palette.text.secondary,
+            lineHeight: 1.62,
+          })}
+        >
+          {props.body}
+        </Typography>
+      </Box>
+    </Box>
+  );
 }
 
 export default function HomePageView() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const onStart = () => {
-        getOrCreateSessionId();
-        trackOnce("quiz_start", { source: "landing" }, "quiz_start");
-        clearResultsSnapshot();
-        clearQuizAnswersKeepSession(false);
-        router.push("/quiz/1");
-    };
+  const onStart = async () => {
+    // Ensure local session and analytics context exist
+    getOrCreateSessionId();
+    trackOnce("quiz_start", { source: "landing" }, "quiz_start");
 
-    return (
-        <Box
-            sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                px: { xs: 2, sm: 3 },
-                py: { xs: 4, sm: 6, md: 7 },
-            }}
+    // Clear previous run state, but keep the browser session identity
+    clearResultsSnapshot();
+    clearQuizAnswersKeepSession(false);
+
+    // Best effort: create backend session before quiz begins
+    try {
+      await ensureQuizSessionStarted();
+    } catch (error) {
+      console.error("Failed to start backend quiz session", error);
+      // okay to continue locally for now
+    }
+
+    router.push("/quiz/1");
+  };
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        px: { xs: 2, sm: 3 },
+        py: { xs: 4, sm: 6, md: 7 },
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 760,
+        }}
+      >
+        <Typography
+          sx={(theme) => ({
+            fontWeight: 800,
+            letterSpacing: theme.typography.h4?.letterSpacing ?? "-0.025em",
+            color: theme.palette.text.primary,
+            fontSize: { xs: 38, sm: 52, md: 62 },
+            lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
+            maxWidth: 760,
+            mb: 2,
+            textAlign: "left",
+          })}
         >
-            <Box
-                sx={{
-                    width: "100%",
-                    maxWidth: 760,
-                }}
-            >
-                <Typography
-                    sx={(theme) => ({
-                        fontWeight: 800,
-                        letterSpacing: theme.typography.h4?.letterSpacing ?? "-0.025em",
-                        color: theme.palette.text.primary,
-                        fontSize: { xs: 38, sm: 52, md: 62 },
-                        lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
-                        maxWidth: 760,
-                        mb: 2,
-                        textAlign: "left",
-                    })}
-                >
-                    You could be losing{" "}
-                    <Box
-                        component="span"
-                        sx={(theme) => ({
-                            color: theme.palette.primary.main,
-                            fontStyle: "italic",
-                        })}
-                    >
-                        thousands
-                    </Box>{" "}
-                    every year in
-                    <Box
-                        component="br"
-                        sx={{ display: { xs: "none", sm: "block" } }}
-                    />
-                    unclaimed rewards and offers.
-                </Typography>
+          You could be losing{" "}
+          <Box
+            component="span"
+            sx={(theme) => ({
+              color: theme.palette.primary.main,
+              fontStyle: "italic",
+            })}
+          >
+            thousands
+          </Box>{" "}
+          every year in
+          <Box component="br" sx={{ display: { xs: "none", sm: "block" } }} />
+          unclaimed rewards and offers.
+        </Typography>
 
-                <Typography
-                    sx={(theme) => ({
-                        color: theme.palette.text.secondary,
-                        fontSize: { xs: 18, sm: 20 },
-                        lineHeight: 1.5,
-                        maxWidth: 620,
-                        mb: 3.5,
-                        textAlign: "left",
-                    })}
-                >
-                    Take 60 seconds to see if you’re leaving value on the table.
-                </Typography>
+        <Typography
+          sx={(theme) => ({
+            color: theme.palette.text.secondary,
+            fontSize: { xs: 18, sm: 20 },
+            lineHeight: 1.5,
+            maxWidth: 620,
+            mb: 3.5,
+            textAlign: "left",
+          })}
+        >
+          Take 60 seconds to see if you’re leaving value on the table.
+        </Typography>
 
-                <Box sx={{ width: "100%" }}>
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        onClick={onStart}
-                        sx={{
-                            fontSize: "1rem",
-                            "&:hover": { filter: "brightness(0.98)" },
-                            "&:active": { transform: "translateY(1px)" },
-                        }}
-                    >
-                        See My Results
-                    </Button>
+        <Box sx={{ width: "100%" }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={onStart}
+            sx={{
+              fontSize: "1rem",
+              "&:hover": { filter: "brightness(0.98)" },
+              "&:active": { transform: "translateY(1px)" },
+            }}
+          >
+            See My Results
+          </Button>
 
-                    <Stack
-                        spacing={2.25}
-                        sx={{
-                            mt: 3.75,
-                            maxWidth: 620,
-                        }}
-                    >
-                        <ConfidenceItem
-                            icon={<AccessTimeOutlinedIcon />}
-                            title="Fast and free"
-                            body="It only takes a few quick taps to get your personalized result."
-                        />
-                        <ConfidenceItem
-                            icon={<VisibilityOffOutlinedIcon />}
-                            title="No contact info required"
-                            body="You can see your results before sharing your name, email, or anything else that identifies you."
-                        />
-                        <ConfidenceItem
-                            icon={<InsightsOutlinedIcon />}
-                            title="Results tailored to you"
-                            body="We use your answers to tailor results to your spending habits and card setup."
-                        />
-                    </Stack>
-                </Box>
-            </Box>
+          <Stack
+            spacing={2.25}
+            sx={{
+              mt: 3.75,
+              maxWidth: 620,
+            }}
+          >
+            <ConfidenceItem
+              icon={<AccessTimeOutlinedIcon />}
+              title="Fast and free"
+              body="It only takes a few quick taps to get your personalized result."
+            />
+            <ConfidenceItem
+              icon={<VisibilityOffOutlinedIcon />}
+              title="No contact info required"
+              body="You can see your results before sharing your name, email, or anything else that identifies you."
+            />
+            <ConfidenceItem
+              icon={<InsightsOutlinedIcon />}
+              title="Results tailored to you"
+              body="We use your answers to tailor results to your spending habits and card setup."
+            />
+          </Stack>
         </Box>
-    );
+      </Box>
+    </Box>
+  );
 }

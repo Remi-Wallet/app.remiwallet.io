@@ -1,15 +1,19 @@
+// amplify/data/resource.ts
+
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 
 const schema = a.schema({
   QuizSession: a
     .model({
+      // clientSessionId correlates frontend local session storage with backend session rows
+      clientSessionId: a.string().required(),
       status: a.enum(["ACTIVE", "COMPLETED", "ABANDONED"]),
       tier: a.enum(["A", "B", "C"]),
+      score: a.integer(),
       currentScreenId: a.string(),
       startedAt: a.datetime(),
       completedAt: a.datetime(),
 
-      // attribution + light client metadata
       utmSource: a.string(),
       utmCampaign: a.string(),
       utmMedium: a.string(),
@@ -18,23 +22,19 @@ const schema = a.schema({
       locale: a.string(),
       timezone: a.string(),
 
-      // relations
       responses: a.hasMany("QuizResponse", "sessionId"),
       lead: a.hasOne("WaitlistLead", "sessionId"),
       events: a.hasMany("EventLog", "sessionId"),
     })
-    .authorization((allow) => [
-      // v1 anonymous: public access (tighten later with Cognito + owner auth)
-      allow.publicApiKey(),
-    ]),
+    .authorization((allow) => [allow.publicApiKey()]),
 
   QuizResponse: a
     .model({
       sessionId: a.id(),
-      screenId: a.string(), // e.g. "S2"
-      questionKey: a.string(), // e.g. "cardCountBand"
+      screenId: a.string(),
+      questionKey: a.string(),
       answerType: a.enum(["single", "multi", "text", "number"]),
-      answer: a.string(), // JSON.stringify(value)
+      answer: a.string(),
       answeredAt: a.datetime(),
 
       session: a.belongsTo("QuizSession", "sessionId"),
@@ -44,14 +44,12 @@ const schema = a.schema({
   WaitlistLead: a
     .model({
       sessionId: a.id(),
+      fullName: a.string(),
       email: a.email().required(),
       phone: a.phone(),
-
-      emailOptIn: a.boolean().default(false),
-      smsOptIn: a.boolean().default(false),
-      betaOptIn: a.boolean().default(false),
-
       sourceTier: a.enum(["A", "B", "C"]),
+      score: a.integer(),
+      source: a.string(),
       createdAt: a.datetime(),
 
       session: a.belongsTo("QuizSession", "sessionId"),
@@ -61,9 +59,9 @@ const schema = a.schema({
   EventLog: a
     .model({
       sessionId: a.id(),
-      eventName: a.string(), // START, SCREEN_VIEW, ANSWER_SUBMIT, TIER_COMPUTED, LEAD_SUBMIT, etc.
+      eventName: a.string(),
       screenId: a.string(),
-      properties: a.string(), // JSON.stringify({...})
+      properties: a.string(),
       createdAt: a.datetime(),
 
       session: a.belongsTo("QuizSession", "sessionId"),

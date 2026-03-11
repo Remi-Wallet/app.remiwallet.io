@@ -13,11 +13,8 @@ import { useRouter } from "next/navigation";
 import { QuizShell } from "@/components/quiz/QuizShell";
 import { track } from "@/lib/analytics/events";
 import { createTrackOnce } from "@/lib/analytics/trackOnce";
-import {
-  getOrCreateSessionId,
-  loadResultsSnapshot,
-  loadQuizState,
-} from "@/lib/quiz/storage";
+import { submitWaitlistLead } from "@/lib/data/quizPersistence";
+import { loadResultsSnapshot, loadQuizState } from "@/lib/quiz/storage";
 import type { Tier } from "@/lib/quiz/types";
 import { tokens } from "@/theme/tokens";
 
@@ -187,6 +184,7 @@ export default function EarlyAccessPageView() {
   const score = snapshot?.score ?? 0;
 
   const content = getTierContent(tier, score);
+  const isQualified = tier === "A" || tier === "B";
 
   React.useEffect(() => {
     trackOnce(
@@ -203,7 +201,6 @@ export default function EarlyAccessPageView() {
 
   const emailIsValid = /\S+@\S+\.\S+/.test(email.trim());
   const canSubmit = fullName.trim().length >= 2 && emailIsValid && !submitting;
-  const isQualified = tier === "A" || tier === "B";
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -211,39 +208,31 @@ export default function EarlyAccessPageView() {
 
     setSubmitting(true);
 
-    const payload = {
-      sessionId: getOrCreateSessionId(),
-      fullName: fullName.trim(),
-      email: email.trim(),
-      tier,
-      score,
-      source: "early_access",
-      submittedAt: new Date().toISOString(),
-    };
-
     try {
       track("lead_submit", {
         source: "early_access",
         method: "email",
-        hasName: !!payload.fullName,
-        tier: payload.tier,
-        score: payload.score,
+        hasName: !!fullName.trim(),
+        tier,
+        score,
       });
 
-      // TODO: replace with real API / server action
-      // Example:
-      // await submitLead(payload);
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      await submitWaitlistLead({
+        fullName,
+        email,
+        source: "early_access",
+      });
 
       track("lead_submitted", {
         source: "early_access",
         method: "email",
-        tier: payload.tier,
-        score: payload.score,
+        tier,
+        score,
       });
 
       setSubmitted(true);
-    } catch {
+    } catch (error) {
+      console.error("Failed to submit waitlist lead", error);
       setSubmitting(false);
       return;
     }
@@ -285,7 +274,11 @@ export default function EarlyAccessPageView() {
               </Typography>
             </Box>
 
-            <Button variant="contained" size="large" onClick={() => router.push("/")}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push("/")}
+            >
               Back to home
             </Button>
           </Stack>

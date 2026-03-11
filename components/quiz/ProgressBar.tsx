@@ -1,3 +1,5 @@
+// components/quiz/ProgressBar.tsx
+
 "use client";
 
 import * as React from "react";
