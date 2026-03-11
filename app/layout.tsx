@@ -16,6 +16,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <div
+          aria-hidden="true"
+          style={{ display: "contents" }}
+          dangerouslySetInnerHTML={{
+            __html: `<!--
+REMI // If you’re reading this, you’re probably our kind of curious.
+We’re building a smarter tap-to-pay wallet that’s better for users, better for issuers, and harder than it looks.
+Interested in helping build it? Reach out to the team and include: "I want to build the world's smartest mobile wallet."
+-->`,
+          }}
+        />
         <Providers>
           <AnalyticsProvider />
           <AppShell>{children}</AppShell>
