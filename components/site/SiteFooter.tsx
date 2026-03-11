@@ -1,6 +1,5 @@
 // components/site/SiteFooter.tsx
 
-import * as React from "react";
 import { Box, Link, Stack, Typography } from "@mui/material";
 import { tokens } from "@/theme/tokens";
 
@@ -20,71 +19,83 @@ export function SiteFooter(props: SiteFooterProps) {
 
   const disclaimer =
     props.disclaimer ??
-    "Remi provides informational and insights to help you better understand your options, but does not provide financial, tax, legal, or investment advice. Any rewards estimates, optimization insights, or product details are illustrative and may vary based on your individual circumstances and may change over time.";
+    "Remi provides information and insights, not financial, tax, legal, or investment advice. Rewards estimates, optimization insights, and product details are illustrative, may vary by user, and may change over time.";
 
   return (
     <Box component="footer" sx={{ width: "100%", mt: "auto" }}>
       <Box
-        sx={{
-          borderTop: `1px solid ${tokens.color.semantic.border.default}`,
-          backgroundColor: "#EEF5F1",
-        }}
+        sx={(theme) => ({
+          borderTop: `1px solid ${theme.custom.chrome.footer.border}`,
+          backgroundColor: theme.custom.chrome.footer.bg,
+        })}
       >
         <Box
-          sx={{
-            maxWidth: tokens.layout.footerMax,
+          sx={(theme) => ({
+            maxWidth: theme.custom.chrome.footer.maxWidth,
             mx: "auto",
             px: { xs: 2, sm: 3 },
-            py: 1,
-          }}
+            py: { xs: 0.9, sm: 1.0 },
+          })}
         >
           <Stack
-            spacing={0.35}
+            spacing={0.25}
             alignItems="center"
             justifyContent="center"
             sx={{ textAlign: "center" }}
           >
             <Typography
-              sx={{
-                fontSize: "0.76rem",
-                color: tokens.color.semantic.text.secondary,
-                fontWeight: tokens.typography.weight.medium,
-                lineHeight: 1.35,
-              }}
+              sx={(theme) => ({
+                fontSize: "0.75rem",
+                color: theme.custom.chrome.footer.text,
+                fontWeight: 500,
+                lineHeight: 1.3,
+              })}
             >
               © {year} {company}. All rights reserved.
             </Typography>
 
             <Stack
               direction="row"
-              spacing={2}
+              spacing={1.75}
               alignItems="center"
               justifyContent="center"
+              flexWrap="wrap"
+              useFlexGap
             >
               <Link
                 href={privacyHref}
-                underline="hover"
+                underline="none"
                 color="inherit"
-                sx={{
-                  fontSize: "0.74rem",
-                  color: tokens.color.semantic.brand.primary,
-                  fontWeight: tokens.typography.weight.medium,
+                sx={(theme) => ({
+                  fontSize: "0.73rem",
+                  color: theme.custom.chrome.footer.link,
+                  fontWeight: 500,
                   textUnderlineOffset: "2px",
-                }}
+                  transition: `opacity ${theme.custom.motion.fast}ms ${theme.custom.motion.easingStandard}`,
+                  "&:hover": {
+                    opacity: 0.8,
+                    textDecoration: "underline",
+                  },
+                })}
               >
                 Privacy Policy
               </Link>
 
               <Link
                 href={termsHref}
-                underline="hover"
+                underline="none"
                 color="inherit"
-                sx={{
-                  fontSize: "0.74rem",
-                  color: tokens.color.semantic.brand.primary,
-                  fontWeight: tokens.typography.weight.medium,
+                sx={(theme) => ({
+                  fontSize: "0.73rem",
+                  color: theme.custom.chrome.footer.link,
+                  fontWeight: 500,
                   textUnderlineOffset: "2px",
-                }}
+                  transition: `opacity ${theme.custom.motion.fast}ms ${theme.custom.motion.easingStandard}`,
+                  "&:hover": {
+                    opacity: 0.8,
+                    textDecoration: "underline",
+                  },
+                })}
               >
                 Terms of Use
               </Link>
@@ -94,31 +105,31 @@ export function SiteFooter(props: SiteFooterProps) {
       </Box>
 
       <Box
-        sx={{
-          backgroundColor: "#E4EEE8",
-          borderTop: "1px solid rgba(0,0,0,0.04)",
-        }}
+        sx={(theme) => ({
+          backgroundColor: theme.custom.chrome.footer.subBg,
+          borderTop: `1px solid ${theme.custom.chrome.footer.subBorder}`,
+        })}
       >
         <Box
-          sx={{
-            maxWidth: tokens.layout.footerMax,
+          sx={(theme) => ({
+            maxWidth: theme.custom.chrome.footer.maxWidth,
             mx: "auto",
             px: { xs: 2, sm: 3 },
-            py: 0.85,
-          }}
+            py: { xs: 0.55, sm: 0.7 },
+          })}
         >
           <Typography
-            sx={{
+            sx={(theme) => ({
               display: "block",
               textAlign: "center",
-              fontSize: "0.66rem",
-              fontStyle: "italic",
-              lineHeight: 1.45,
-              color: tokens.color.semantic.text.secondary,
-              opacity: 0.78,
-              maxWidth: 920,
+              fontSize: "0.64rem",
+              lineHeight: 1.38,
+              letterSpacing: "0.002em",
+              color: theme.custom.chrome.footer.subText,
+              opacity: 0.9,
+              maxWidth: { xs: 300, sm: 500, md: 680 },
               mx: "auto",
-            }}
+            })}
           >
             {disclaimer}
           </Typography>
@@ -127,5 +138,4 @@ export function SiteFooter(props: SiteFooterProps) {
     </Box>
   );
 }
-
 export default SiteFooter;

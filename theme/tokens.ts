@@ -30,7 +30,6 @@ export const tokens = {
     },
   },
 
-  // ---- Colors ----
   color: {
     palette: {
       forest950: "#052517",
@@ -61,7 +60,7 @@ export const tokens = {
         surface: "#FFFFFF",
         surfaceMuted: "#F7FBF9",
         header: "#F4FBF7",
-        footer: "#041711",
+        footer: "#EEF5F1",
       },
 
       text: {
@@ -69,7 +68,7 @@ export const tokens = {
         secondary: "#5F746B",
         muted: "#6B7F77",
         inverse: "#FFFFFF",
-        link: "#FFFFFF",
+        linkInverse: "#FFFFFF",
       },
 
       border: {
@@ -82,7 +81,7 @@ export const tokens = {
         primaryHover: "#09563F",
         onPrimary: "#FFFFFF",
         accent: "#5CEC89",
-        accentSoft: "#E7FAEF",
+        accentTint: "#E7FAEF",
       },
 
       state: {
@@ -98,23 +97,22 @@ export const tokens = {
 
       chrome: {
         header: {
-          bg: "rgba(244,251,247,0.78)",
-          border: "#DDE8E2",
+          bg: "rgba(244,251,247,0.74)",
+          border: "#E1EBE5",
         },
         footer: {
-          bg: "#08261B",
-          subBg: "#041711",
-          text: "#F4FBF7",
-          subText: "rgba(244,251,247,0.74)",
-          link: "#F4FBF7",
-          border: "rgba(255,255,255,0.10)",
-          subBorder: "rgba(255,255,255,0.05)",
+          bg: "#EEF5F1",
+          subBg: "#E4EEE8",
+          text: "#5F746B",
+          subText: "#7A8D85",
+          link: "#3D7A67",
+          border: "#DDE8E2",
+          subBorder: "#D7E4DD",
         },
       },
     },
   },
 
-  // ---- Typography ----
   typography: {
     fontFamily: {
       sans:
@@ -165,7 +163,6 @@ export const tokens = {
     },
   },
 
-  // ---- Spacing (8px grid) ----
   spacing: {
     grid: 8,
     xs: 4,
@@ -177,7 +174,6 @@ export const tokens = {
     "3xl": 64,
   },
 
-  // ---- Radius ----
   radius: {
     xs: 8,
     sm: 12,
@@ -187,14 +183,12 @@ export const tokens = {
     pill: 999,
   },
 
-  // ---- Shadow ----
   shadow: {
     sm: "0 1px 2px rgba(15, 23, 42, 0.08)",
     md: "0 6px 18px rgba(15, 23, 42, 0.12)",
     lg: "0 12px 30px rgba(15, 23, 42, 0.16)",
   },
 
-  // ---- Component tokens ----
   component: {
     button: {
       minHeight: 58,
@@ -208,7 +202,6 @@ export const tokens = {
     },
   },
 
-  // ---- Motion ----
   motion: {
     duration: {
       fast: 120,
@@ -221,7 +214,6 @@ export const tokens = {
     },
   },
 
-  // ---- Layout ----
   layout: {
     containerMax: 960,
     contentMax: 840,
@@ -231,7 +223,6 @@ export const tokens = {
     headerBlurPx: 10,
   },
 
-  // ---- Z-index ----
   zIndex: {
     header: 1100,
     modal: 1300,
