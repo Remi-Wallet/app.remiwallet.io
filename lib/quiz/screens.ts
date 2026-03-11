@@ -43,8 +43,8 @@ export const SCREENS: Record<number, QuizScreen> = {
     autoAdvance: true,
     options: [
       { label: "Under $1,000", value: "under_1k" },
-      { label: "$1,000–3,000", value: "1_3k" },
-      { label: "$3,000–7,000", value: "3_7k" },
+      { label: "$1,000–$3,000", value: "1_3k" },
+      { label: "$3,000–$7,000", value: "3_7k" },
       { label: "$7,000+", value: "7k_plus" },
     ],
   },
