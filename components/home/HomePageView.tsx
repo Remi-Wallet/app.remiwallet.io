@@ -135,7 +135,7 @@ export default function HomePageView() {
           <Box
             component="span"
             sx={(theme) => ({
-              color: theme.palette.primary.main,
+              color: theme.palette.secondary.main,
               fontStyle: "italic",
             })}
           >

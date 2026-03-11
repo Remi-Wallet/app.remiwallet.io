@@ -274,11 +274,7 @@ export default function EarlyAccessPageView() {
               </Typography>
             </Box>
 
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => router.push("/")}
-            >
+            <Button variant="contained" size="large" onClick={() => router.push("/")}>
               Back to home
             </Button>
           </Stack>
@@ -293,18 +289,18 @@ export default function EarlyAccessPageView() {
         <Stack spacing={3}>
           {isQualified ? (
             <Box
-              sx={{
+              sx={(theme) => ({
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 1.5,
                 p: 2,
                 borderRadius: tokens.radius.md,
-                backgroundColor: alpha(tokens.color.palette.mint600, 0.08),
-                border: `1px solid ${alpha(tokens.color.palette.mint600, 0.24)}`,
-              }}
+                backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                border: `1px solid ${alpha(theme.palette.secondary.main, 0.24)}`,
+              })}
             >
               <Box
-                sx={{
+                sx={(theme) => ({
                   width: 32,
                   height: 32,
                   minWidth: 32,
@@ -312,10 +308,10 @@ export default function EarlyAccessPageView() {
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: "999px",
-                  backgroundColor: alpha(tokens.color.palette.mint600, 0.14),
-                  color: tokens.color.palette.mint600,
+                  backgroundColor: alpha(theme.palette.secondary.main, 0.14),
+                  color: theme.palette.secondary.main,
                   mt: "2px",
-                }}
+                })}
               >
                 <StarsOutlinedIcon sx={{ fontSize: 18 }} />
               </Box>

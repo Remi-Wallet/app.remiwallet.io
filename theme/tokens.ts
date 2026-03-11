@@ -32,81 +32,83 @@ export const tokens = {
 
   // ---- Colors ----
   color: {
-    // Raw palette tokens
     palette: {
-      navy900: "#0B2B46",
-      navy800: "#0F355A",
-      navy700: "#14466F",
+      forest950: "#052517",
+      forest900: "#0A2F22",
+      forest800: "#0F4A36",
 
-      slate900: "#0B1220",
-      slate700: "#334155",
-      slate500: "#64748B",
-      slate300: "#CBD5E1",
-      slate200: "#E2E8F0",
-      slate100: "#F1F5F9",
+      slate900: "#0F1F19",
+      slate700: "#415951",
+      slate500: "#6B7F77",
+      slate300: "#C9D8D1",
+      slate200: "#DDE8E2",
+      slate100: "#F4FBF7",
       white: "#FFFFFF",
 
-      mint600: "#06D6A0",
-      mint500: "#10B981",
-      mint100: "#D1FAE5",
+      green700: "#09563F",
+      green600: "#0C6B4F",
+      green500: "#2DBA7D",
+      mint400: "#5CEC89",
+      mint100: "#E7FAEF",
 
       amber600: "#F59E0B",
       red600: "#EF4444",
     },
 
-    // Semantic tokens
     semantic: {
       bg: {
-        page: "#EEFFF7",
+        page: "#F4FBF7",
         surface: "#FFFFFF",
-        surfaceMuted: "#F8FAFC",
-        header: "#EEFFF7",
-        footer: "#052517",
+        surfaceMuted: "#F7FBF9",
+        header: "#F4FBF7",
+        footer: "#041711",
       },
 
       text: {
         primary: "#052517",
-        secondary: "#9A8F97",
-        muted: "#64748B",
-        inverse: "#110404",
+        secondary: "#5F746B",
+        muted: "#6B7F77",
+        inverse: "#FFFFFF",
         link: "#FFFFFF",
       },
 
       border: {
-        default: "#E2E8F0",
-        strong: "#CBD5E1",
+        default: "#DDE8E2",
+        strong: "#C9D8D1",
       },
 
       brand: {
-        primary: "#5CEC89",
-        primaryHover: "#5CEC89",
+        primary: "#0C6B4F",
+        primaryHover: "#09563F",
         onPrimary: "#FFFFFF",
+        accent: "#5CEC89",
+        accentSoft: "#E7FAEF",
       },
 
       state: {
-        success: "#5CEC89",
+        success: "#2DBA7D",
         warning: "#F59E0B",
         error: "#EF4444",
-        info: "#14466F",
+        info: "#0F4A36",
       },
 
       focus: {
-        ring: "rgba(6, 214, 160, 0.35)",
+        ring: "rgba(45, 186, 125, 0.28)",
       },
 
       chrome: {
         header: {
-          bg: "rgba(255,255,255,0.72)",
-          border: "#E2E8F0",
+          bg: "rgba(244,251,247,0.78)",
+          border: "#DDE8E2",
         },
         footer: {
-          bg: "#0B9064",
-          subBg: "#052517",
-          text: "#EEFFF7",
-          subText: "#EEFFF7",
-          link: "#EEFFF7",
-          border: "rgba(255,255,255,0.14)",
-          subBorder: "rgba(255,255,255,0.06)",
+          bg: "#08261B",
+          subBg: "#041711",
+          text: "#F4FBF7",
+          subText: "rgba(244,251,247,0.74)",
+          link: "#F4FBF7",
+          border: "rgba(255,255,255,0.10)",
+          subBorder: "rgba(255,255,255,0.05)",
         },
       },
     },

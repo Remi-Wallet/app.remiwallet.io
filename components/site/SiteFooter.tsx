@@ -1,7 +1,7 @@
 // components/site/SiteFooter.tsx
 
 import * as React from "react";
-import { Box, Container, Link, Typography } from "@mui/material";
+import { Box, Link, Stack, Typography } from "@mui/material";
 import { tokens } from "@/theme/tokens";
 
 type SiteFooterProps = {
@@ -10,12 +10,6 @@ type SiteFooterProps = {
   privacyHref?: string;
   termsHref?: string;
   disclaimer?: string;
-
-  /**
-   * Optional overrides
-   */
-  bgTop?: string;
-  bgBottom?: string;
 };
 
 export function SiteFooter(props: SiteFooterProps) {
@@ -26,73 +20,55 @@ export function SiteFooter(props: SiteFooterProps) {
 
   const disclaimer =
     props.disclaimer ??
-    "Remi provides informational and educational content through this waitlist and beta experience only. Remi does not provide financial, tax, legal, or investment advice. Any rewards estimates, optimization insights, or product descriptions are illustrative and may change.";
-
-  const bgTop = props.bgTop ?? tokens.color.semantic.chrome.footer.bg;
-  const bgBottom = props.bgBottom ?? tokens.color.semantic.chrome.footer.subBg;
+    "Remi provides informational and insights to help you better understand your options, but does not provide financial, tax, legal, or investment advice. Any rewards estimates, optimization insights, or product details are illustrative and may vary based on your individual circumstances and may change over time.";
 
   return (
     <Box component="footer" sx={{ width: "100%", mt: "auto" }}>
       <Box
         sx={{
-          borderTop: `1px solid ${tokens.color.semantic.chrome.footer.border}`,
-          backgroundColor: bgTop,
-          color: tokens.color.semantic.chrome.footer.text,
+          borderTop: `1px solid ${tokens.color.semantic.border.default}`,
+          backgroundColor: "#EEF5F1",
         }}
       >
-        <Container
-          maxWidth={false}
+        <Box
           sx={{
             maxWidth: tokens.layout.footerMax,
+            mx: "auto",
             px: { xs: 2, sm: 3 },
+            py: 1,
           }}
         >
-          <Box
-            sx={{
-              py: 2,
-              display: { xs: "flex", sm: "grid" },
-              flexDirection: { xs: "column" },
-              alignItems: "center",
-              justifyContent: "center",
-              gridTemplateColumns: { sm: "1fr auto 1fr" },
-              columnGap: 2,
-              rowGap: { xs: 1, sm: 0 },
-              textAlign: { xs: "center", sm: "left" },
-            }}
+          <Stack
+            spacing={0.35}
+            alignItems="center"
+            justifyContent="center"
+            sx={{ textAlign: "center" }}
           >
-            <Box sx={{ display: { xs: "none", sm: "block" } }} />
-
             <Typography
-              variant="body2"
               sx={{
+                fontSize: "0.76rem",
+                color: tokens.color.semantic.text.secondary,
                 fontWeight: tokens.typography.weight.medium,
-                letterSpacing: tokens.typography.letterSpacing.normal,
-                color: tokens.color.semantic.chrome.footer.text,
-                opacity: 0.92,
-                justifySelf: { sm: "center" },
+                lineHeight: 1.35,
               }}
             >
               © {year} {company}. All rights reserved.
             </Typography>
 
-            <Box
-              sx={{
-                display: "flex",
-                gap: 3,
-                flexWrap: "wrap",
-                justifyContent: { xs: "center", sm: "flex-end" },
-                width: { xs: "100%", sm: "auto" },
-                justifySelf: { sm: "end" },
-              }}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="center"
             >
               <Link
                 href={privacyHref}
                 underline="hover"
                 color="inherit"
                 sx={{
-                  fontWeight: tokens.typography.weight.semibold,
-                  whiteSpace: "nowrap",
-                  color: tokens.color.semantic.chrome.footer.link,
+                  fontSize: "0.74rem",
+                  color: tokens.color.semantic.brand.primary,
+                  fontWeight: tokens.typography.weight.medium,
                   textUnderlineOffset: "2px",
                 }}
               >
@@ -104,48 +80,49 @@ export function SiteFooter(props: SiteFooterProps) {
                 underline="hover"
                 color="inherit"
                 sx={{
-                  fontWeight: tokens.typography.weight.semibold,
-                  whiteSpace: "nowrap",
-                  color: tokens.color.semantic.chrome.footer.link,
+                  fontSize: "0.74rem",
+                  color: tokens.color.semantic.brand.primary,
+                  fontWeight: tokens.typography.weight.medium,
                   textUnderlineOffset: "2px",
                 }}
               >
                 Terms of Use
               </Link>
-            </Box>
-          </Box>
-        </Container>
+            </Stack>
+          </Stack>
+        </Box>
       </Box>
 
       <Box
         sx={{
-          backgroundColor: bgBottom,
-          color: tokens.color.semantic.chrome.footer.subText,
-          borderTop: `1px solid ${tokens.color.semantic.chrome.footer.subBorder}`,
-          py: 1.75,
+          backgroundColor: "#E4EEE8",
+          borderTop: "1px solid rgba(0,0,0,0.04)",
         }}
       >
-        <Container
-          maxWidth={false}
+        <Box
           sx={{
             maxWidth: tokens.layout.footerMax,
+            mx: "auto",
             px: { xs: 2, sm: 3 },
+            py: 0.85,
           }}
         >
           <Typography
-            variant="caption"
             sx={{
               display: "block",
               textAlign: "center",
-              lineHeight: 1.7,
-              fontSize: "0.78rem",
-              px: 2,
-              color: tokens.color.semantic.chrome.footer.subText,
+              fontSize: "0.66rem",
+              fontStyle: "italic",
+              lineHeight: 1.45,
+              color: tokens.color.semantic.text.secondary,
+              opacity: 0.78,
+              maxWidth: 920,
+              mx: "auto",
             }}
           >
             {disclaimer}
           </Typography>
-        </Container>
+        </Box>
       </Box>
     </Box>
   );

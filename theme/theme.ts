@@ -9,6 +9,9 @@ export const theme = createTheme({
             main: t.color.semantic.brand.primary,
             contrastText: t.color.semantic.brand.onPrimary,
         },
+        secondary: {
+            main: t.color.semantic.brand.accent,
+        },
         background: {
             default: t.color.semantic.bg.page,
             paper: t.color.semantic.bg.surface,
@@ -18,10 +21,6 @@ export const theme = createTheme({
             secondary: t.color.semantic.text.secondary,
         },
         divider: t.color.semantic.border.default,
-        error: { main: t.color.semantic.state.error },
-        warning: { main: t.color.semantic.state.warning },
-        success: { main: t.color.semantic.state.success },
-        info: { main: t.color.semantic.state.info },
     },
 
     shape: {
