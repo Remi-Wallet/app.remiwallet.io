@@ -28,6 +28,7 @@ import {
   getProjectionRangeLabel,
   formatDollar,
 } from "@/lib/quiz/scoring";
+import { getSummaryCopy } from "@/lib/quiz/resultsCopy";
 
 const trackOnce = createTrackOnce(track);
 
@@ -39,52 +40,30 @@ function vibrate(pattern: number | number[]) {
   } catch {}
 }
 
-function getSummaryCopy(tier: Tier, rangeLabel?: string) {
-  if (tier === "A") {
-    return {
-      title: "You’re a strong candidate for serious rewards optimization.",
-      subtitle: "You likely have meaningful upside with better timing + card strategy.",
-      body: rangeLabel
-        ? `You may be missing roughly ${rangeLabel} in potential yearly value depending on how optimized your setup becomes.`
-        : "You may qualify for early beta access as we refine Remi with real users.",
-      calloutTitle: "You may be leaving meaningful value on the table.",
-      calloutBody:
-        "Advanced users often unlock more value by pairing the right card with the right category and redemption path.",
-      cta: "Request Early Access",
-    };
-  }
-
-  if (tier === "B") {
-    return {
-      title: "You’re close — a few changes could improve your rewards quickly.",
-      subtitle: "You don’t need a full overhaul to capture more value.",
-      body: rangeLabel
-        ? `You may be missing roughly ${rangeLabel} in potential yearly value with a more optimized setup.`
-        : "You may qualify for early access as we expand onboarding and product testing.",
-      calloutTitle: "You likely have some easy wins.",
-      calloutBody:
-        "Small shifts in which card you use for everyday categories can add up surprisingly fast over time.",
-      cta: "Check early access",
-    };
-  }
-
-  return {
-    title: "You can still earn more — without changing how you spend.",
-    subtitle: "Start simple. Build confidence. Improve over time.",
-    body: rangeLabel
-      ? `You may still have roughly ${rangeLabel} in yearly upside as your setup improves.`
-      : "Join early access and we’ll keep you updated as Remi evolves.",
-    calloutTitle: "Good news: most people start here.",
-    calloutBody:
-      "Remi helps you build a simple system so you can capture more value without needing to become a points expert overnight.",
-    cta: "Join early access",
-  };
+function ReassuranceText(props: { children: React.ReactNode }) {
+  return (
+    <Typography
+      sx={(theme) => ({
+        mt: 0.9,
+        textAlign: "center",
+        fontSize: "0.8rem",
+        color: theme.palette.text.secondary,
+        lineHeight: 1.4,
+        maxWidth: 420,
+        mx: "auto",
+        opacity: 0.9,
+      })}
+    >
+      {props.children}
+    </Typography>
+  );
 }
 
 export default function QuizResultsPageView() {
   const [tier, setTier] = React.useState<Tier>("C");
   const [score, setScore] = React.useState<number>(0);
-  const [projection, setProjection] = React.useState<ReturnType<typeof getResultsProjection> | null>(null);
+  const [projection, setProjection] =
+    React.useState<ReturnType<typeof getResultsProjection> | null>(null);
 
   React.useEffect(() => {
     const run = async () => {
@@ -224,7 +203,7 @@ export default function QuizResultsPageView() {
     ? getProjectionRangeLabel(projection.gapLow, projection.gapHigh)
     : undefined;
 
-  const copy = getSummaryCopy(tier, rangeLabel);
+  const copy = getSummaryCopy(tier);
 
   const bars =
     projection?.bars ?? [
@@ -235,63 +214,89 @@ export default function QuizResultsPageView() {
 
   return (
     <QuizShell variant="quiz" title={copy.title} subtitle={copy.subtitle}>
-      <Box className="remi-summary">
-        <Stack spacing={2}>
-          <SummaryBars
-            rows={bars.map((row) => ({
-              label:
-                row.amount > 0
-                  ? `${row.label} · ${formatDollar(row.amount)}/yr`
-                  : row.label,
-              value: row.value,
-              emphasis: row.emphasis,
-            }))}
-            caption="These estimates are directional and based on your current setup and spending profile."
-          />
+      <Box className="remi-summary" sx={{ maxWidth: 720 }}>
+        <Stack spacing={2.25}>
+          {rangeLabel ? (
+            <Typography
+              sx={(theme) => ({
+                fontSize: { xs: "1rem", sm: "1.08rem" },
+                lineHeight: 1.45,
+                color: theme.palette.text.primary,
+                fontWeight: 700,
+                letterSpacing: "-0.01em",
+              })}
+            >
+              You may be missing roughly {rangeLabel} per year in rewards value.
+            </Typography>
+          ) : null}
+
+          <Box
+            sx={(theme) => ({
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: "rgba(255,255,255,0.72)",
+              borderRadius: 5,
+              px: { xs: 2, sm: 2.25 },
+              py: { xs: 2, sm: 2.25 },
+              boxShadow: "0 10px 30px rgba(15, 23, 42, 0.04)",
+              backdropFilter: "blur(8px)",
+            })}
+          >
+            <SummaryBars
+              rows={bars.map((row) => ({
+                label:
+                  row.amount > 0
+                    ? `${row.label} · ${formatDollar(row.amount)}`
+                    : row.label,
+                value: row.value,
+                emphasis: row.emphasis,
+              }))}
+              caption="Estimated yearly value based on your current setup and spending profile."
+            />
+          </Box>
 
           <Box
             sx={{
-              border: "1px solid rgba(6,214,160,0.35)",
-              backgroundColor: "rgba(6,214,160,0.06)",
-              borderRadius: 16,
+              border: "1px solid rgba(6,214,160,0.24)",
+              backgroundColor: "rgba(6,214,160,0.05)",
+              borderRadius: 5,
               p: 2,
             }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>
               {copy.calloutTitle}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
               {copy.calloutBody}
             </Typography>
           </Box>
 
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mt: -0.25 }}>
             {copy.body}
           </Typography>
 
-          <Button
-            variant="contained"
-            size="large"
-            component={Link}
-            href="/early-access"
-            onClick={() => {
-              track("summary_cta", {
-                tier,
-                score,
-                destination: "early_access",
-              });
-            }}
-          >
-            {copy.cta}
-          </Button>
+          <Box sx={{ pt: 0 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              component={Link}
+              href="/early-access"
+              sx={{ fontWeight: 600 }}
+              onClick={() => {
+                track("summary_cta", {
+                  tier,
+                  score,
+                  destination: "early_access",
+                });
+              }}
+            >
+              {copy.cta}
+            </Button>
 
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ opacity: 0.6, textAlign: "center" }}
-          >
-            Score: {score} • Tier {tier}
-          </Typography>
+            <ReassuranceText>
+              No credit card required for early access.
+            </ReassuranceText>
+          </Box>
         </Stack>
       </Box>
     </QuizShell>

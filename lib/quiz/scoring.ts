@@ -388,7 +388,7 @@ export function getResultsProjection(answers: Answers): ResultsProjection {
 export function getProjectionRangeLabel(gapLow: number, gapHigh: number): string {
   const low = Math.min(gapLow, gapHigh);
   const high = Math.max(gapLow, gapHigh);
-  return `${formatDollar(low)}–${formatDollar(high)}/yr`;
+  return `${formatDollar(low)}–${formatDollar(high)}`;
 }
 
 export function getRemiScoreSummary(answers: Answers) {
