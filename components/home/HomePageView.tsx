@@ -22,7 +22,7 @@ const trackOnce = createTrackOnce(track);
 function ConfidenceItem(props: {
   icon: React.ReactNode;
   title: string;
-  body: string;
+  body: React.ReactNode;
 }) {
   return (
     <Box
@@ -84,11 +84,13 @@ function ReassuranceText(props: { children: React.ReactNode }) {
   return (
     <Typography
       sx={(theme) => ({
-        mt: 1.1,
+        mt: 0.9,
         textAlign: "center",
-        fontSize: "0.82rem",
+        fontSize: "0.8rem",
         color: theme.palette.text.secondary,
-        lineHeight: 1.45,
+        lineHeight: 1.4,
+        maxWidth: 420,
+        mx: "auto",
       })}
     >
       {props.children}
@@ -199,26 +201,41 @@ export default function HomePageView() {
           <Stack
             spacing={2.25}
             sx={{
-              mt: 3.25,
+              mt: 3.5,
               maxWidth: 620,
             }}
           >
             <ConfidenceItem
               icon={<AccessTimeOutlinedIcon />}
               title="Fast and free"
-              body="It only takes a few quick taps to get your personalized result."
+              body={
+                <>
+                  It only takes a few quick taps to get your{" "}
+                  <strong>personalized result</strong>.
+                </>
+              }
             />
 
             <ConfidenceItem
               icon={<InsightsOutlinedIcon />}
               title="Find hidden rewards"
-              body="See where your current cards may be missing points, offers, or bonuses."
+              body={
+                <>
+                  See where you may be missing{" "}
+                  <strong>points, offers, or bonuses</strong>.
+                </>
+              }
             />
 
             <ConfidenceItem
               icon={<VisibilityOffOutlinedIcon />}
               title="Private by default"
-              body="Your answers stay anonymous while we analyze your card setup."
+              body={
+                <>
+                  Your answers <strong>stay anonymous</strong> while we analyze your card
+                  setup.
+                </>
+              }
             />
           </Stack>
         </Box>
