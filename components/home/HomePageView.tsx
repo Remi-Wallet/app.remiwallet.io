@@ -80,6 +80,22 @@ function ConfidenceItem(props: {
   );
 }
 
+function ReassuranceText(props: { children: React.ReactNode }) {
+  return (
+    <Typography
+      sx={(theme) => ({
+        mt: 1.1,
+        textAlign: "center",
+        fontSize: "0.82rem",
+        color: theme.palette.text.secondary,
+        lineHeight: 1.45,
+      })}
+    >
+      {props.children}
+    </Typography>
+  );
+}
+
 export default function HomePageView() {
   const router = useRouter();
 
@@ -168,6 +184,7 @@ export default function HomePageView() {
             onClick={onStart}
             sx={{
               fontSize: "1rem",
+              fontWeight: 600,
               "&:hover": { filter: "brightness(0.98)" },
               "&:active": { transform: "translateY(1px)" },
             }}
@@ -175,10 +192,14 @@ export default function HomePageView() {
             See My Results
           </Button>
 
+          <ReassuranceText>
+            See your results before sharing any contact info.
+          </ReassuranceText>
+
           <Stack
             spacing={2.25}
             sx={{
-              mt: 3.75,
+              mt: 3.25,
               maxWidth: 620,
             }}
           >
@@ -187,15 +208,17 @@ export default function HomePageView() {
               title="Fast and free"
               body="It only takes a few quick taps to get your personalized result."
             />
-            <ConfidenceItem
-              icon={<VisibilityOffOutlinedIcon />}
-              title="No contact info required"
-              body="You can see your results before sharing your name, email, or anything else that identifies you."
-            />
+
             <ConfidenceItem
               icon={<InsightsOutlinedIcon />}
-              title="Results tailored to you"
-              body="We use your answers to tailor results to your spending habits and card setup."
+              title="Find hidden rewards"
+              body="See where your current cards may be missing points, offers, or bonuses."
+            />
+
+            <ConfidenceItem
+              icon={<VisibilityOffOutlinedIcon />}
+              title="Private by default"
+              body="Your answers stay anonymous while we analyze your card setup."
             />
           </Stack>
         </Box>
