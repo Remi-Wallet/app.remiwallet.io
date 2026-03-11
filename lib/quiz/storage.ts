@@ -11,7 +11,17 @@ type EnvelopeV1 = { v: 1; data: QuizState };
 
 export type ResultsSnapshot = {
   tier: Tier;
-  score: number;
+  score: number; // existing lightweight routing score
+  remiScore?: number;
+  opportunityBand?: "low" | "moderate" | "high" | "very_high";
+  estimatedValueNow?: number;
+  estimatedValueOptimized?: number;
+  estimatedValueFullyOptimized?: number;
+  estimatedGapOptimized?: number;
+  estimatedGapFullyOptimized?: number;
+  spendCategories?: string[];
+  travelCards?: string[];
+  everydayCards?: string[];
   computedAt: number;
 };
 

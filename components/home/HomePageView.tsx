@@ -14,7 +14,7 @@ import {
   clearQuizAnswersKeepSession,
 } from "@/lib/quiz/storage";
 import { ensureQuizSessionStarted } from "@/lib/data/quizPersistence";
-import { track } from "@/lib/analytics/events";
+import { track, clearEventBuffer } from "@/lib/analytics/events";
 import { createTrackOnce } from "@/lib/analytics/trackOnce";
 
 const trackOnce = createTrackOnce(track);
@@ -107,6 +107,7 @@ export default function HomePageView() {
     trackOnce("quiz_start", { source: "landing" }, "quiz_start");
 
     // Clear previous run state, but keep the browser session identity
+    clearEventBuffer();
     clearResultsSnapshot();
     clearQuizAnswersKeepSession(false);
 

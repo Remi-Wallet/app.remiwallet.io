@@ -170,9 +170,9 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
 
   const opportunityScore = clamp(
     (spendOpportunity[spend] ?? 16) +
-      categoryOpportunity +
-      (cardCountOpportunity[cards] ?? 6) +
-      travelOpportunity,
+    categoryOpportunity +
+    (cardCountOpportunity[cards] ?? 6) +
+    travelOpportunity,
     0,
     40
   );
@@ -196,9 +196,9 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
 
   const complexityScore = clamp(
     (cardComplexity[cards] ?? 8) +
-      roleComplexity +
-      ecosystemComplexity +
-      premiumComplexity,
+    roleComplexity +
+    ecosystemComplexity +
+    premiumComplexity,
     0,
     30
   );
@@ -214,7 +214,7 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
 
   const walletConfusionBonus =
     (cards === "4-6" || cards === "7+") &&
-    (feel === "confusing" || feel === "leaving_value")
+      (feel === "confusing" || feel === "leaving_value")
       ? 4
       : 0;
 
@@ -224,8 +224,8 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
 
   const frictionScore = clamp(
     (feelFriction[feel] ?? 12) +
-      walletConfusionBonus +
-      cobrandFrictionBonus,
+    walletConfusionBonus +
+    cobrandFrictionBonus,
     0,
     30
   );
@@ -332,6 +332,62 @@ export function getEstimatedRangeLabel(
   const low = Math.min(estimatedGapOptimized, estimatedGapFullyOptimized);
   const high = Math.max(estimatedGapOptimized, estimatedGapFullyOptimized);
 
+  return `${formatDollar(low)}–${formatDollar(high)}/yr`;
+}
+
+export type ResultsProjection = {
+  currentValue: number;
+  optimizedValue: number;
+  fullyOptimizedValue: number;
+  gapLow: number;
+  gapHigh: number;
+  bars: Array<{
+    label: string;
+    value: number;
+    emphasis?: boolean;
+    amount: number;
+  }>;
+};
+
+export function getResultsProjection(answers: Answers): ResultsProjection {
+  const breakdown = calculateRemiScore(answers);
+
+  const currentValue = breakdown.estimatedValueNow;
+  const optimizedValue = breakdown.estimatedValueOptimized;
+  const fullyOptimizedValue = breakdown.estimatedValueFullyOptimized;
+
+  const maxValue = Math.max(fullyOptimizedValue, 1);
+
+  return {
+    currentValue,
+    optimizedValue,
+    fullyOptimizedValue,
+    gapLow: breakdown.estimatedGapOptimized,
+    gapHigh: breakdown.estimatedGapFullyOptimized,
+    bars: [
+      {
+        label: "Current",
+        value: currentValue / maxValue,
+        amount: currentValue,
+      },
+      {
+        label: "Optimized",
+        value: optimizedValue / maxValue,
+        amount: optimizedValue,
+        emphasis: true,
+      },
+      {
+        label: "Fully optimized",
+        value: fullyOptimizedValue / maxValue,
+        amount: fullyOptimizedValue,
+      },
+    ],
+  };
+}
+
+export function getProjectionRangeLabel(gapLow: number, gapHigh: number): string {
+  const low = Math.min(gapLow, gapHigh);
+  const high = Math.max(gapLow, gapHigh);
   return `${formatDollar(low)}–${formatDollar(high)}/yr`;
 }
 
