@@ -2,9 +2,9 @@
 
 import { tokens } from "./tokens";
 
-export type LogoType = keyof typeof tokens.brand.assets.logo.guidance.minWidthPx; // "fullLockup" | "wordmark" | "icon"
+export type LogoType = keyof typeof tokens.brand.assets.logo.guidance.minWidthPx;
 export type LogoMode = "light" | "dark";
-export type BrandSurface = keyof typeof tokens.brand.assets.logo.preferred; // "header" | "footer" | "appIcon"
+export type BrandSurface = keyof typeof tokens.brand.assets.logo.preferred;
 
 type BrandLogoMap = {
   [K in LogoType]: Record<LogoMode, string>;
@@ -60,7 +60,6 @@ export function inferModeFromBg(bg?: string): LogoMode {
     return luminance < 0.55 ? "light" : "dark";
   }
 
-  // If passed rgba()/rgb()/named colors/etc, default safely
   return "dark";
 }
 
@@ -124,6 +123,21 @@ export function getBrandLogoDimensions(args?: {
   type?: LogoType;
 }) {
   const resolvedType = resolveLogoType(args);
+  const surface = args?.surface;
+
+  if (surface && surface in tokens.brand.assets.logo.dimensions) {
+    const bySurface =
+      tokens.brand.assets.logo.dimensions[
+        surface as keyof typeof tokens.brand.assets.logo.dimensions
+      ];
+
+    return {
+      type: resolvedType,
+      minWidth: bySurface.minWidth,
+      idealHeight: bySurface.idealHeight,
+      safeArea: tokens.brand.assets.logo.guidance.safeAreaPx,
+    };
+  }
 
   return {
     type: resolvedType,

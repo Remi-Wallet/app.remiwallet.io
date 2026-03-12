@@ -131,7 +131,7 @@ export default function HomePageView() {
       <Box
         sx={{
           width: "100%",
-          maxWidth: 740,
+          maxWidth: 760,
           mx: "auto",
           position: "relative",
           isolation: "isolate",
@@ -162,7 +162,7 @@ export default function HomePageView() {
         <Box
           sx={{
             width: "100%",
-            maxWidth: 620,
+            maxWidth: 700,
             mx: "auto",
             position: "relative",
           }}
@@ -174,7 +174,6 @@ export default function HomePageView() {
               color: theme.palette.text.primary,
               fontSize: { xs: 38, sm: 52, md: 62 },
               lineHeight: { xs: 1.04, sm: 1.03, md: 1.02 },
-              maxWidth: 600,
               transform: "translateY(-6px)",
               mb: 1.5,
               textAlign: "left",
@@ -191,7 +190,7 @@ export default function HomePageView() {
               thousands
             </Box>{" "}
             every year in
-            <Box component="br" sx={{ display: { xs: "none", sm: "block" } }} />
+            <Box component="br" sx={{ display: { xs: "none", md: "block" } }} />
             unclaimed rewards and offers.
           </Typography>
 
@@ -211,6 +210,7 @@ export default function HomePageView() {
           <Box
             sx={{
               width: "100%",
+              maxWidth: 620,
             }}
           >
             <Button
@@ -239,6 +239,7 @@ export default function HomePageView() {
             sx={{
               mt: 3.1,
               width: "100%",
+              maxWidth: 620,
             }}
           >
             <ConfidenceItem

@@ -11,18 +11,13 @@ export default function SiteHeader() {
       sx={{
         width: "100%",
         height: t.layout.headerHeight,
-
         bgcolor: t.color.semantic.chrome.header.bg,
         borderBottom: `1px solid ${t.color.semantic.chrome.header.border}`,
         backdropFilter: `blur(${t.color.semantic.chrome.header.blurPx}px)`,
-
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-
         zIndex: t.zIndex.header,
-
-        // subtle premium highlight line
         boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
       }}
     >
@@ -39,12 +34,16 @@ export default function SiteHeader() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-
-            // optical center correction
             transform: "translateY(-1px)",
           }}
         >
-          <BrandMark surface="header" mode="light" />
+          <Box sx={{ display: { xs: "inline-flex", sm: "none" } }}>
+            <BrandMark surface="appIcon" mode="light" />
+          </Box>
+
+          <Box sx={{ display: { xs: "none", sm: "inline-flex" } }}>
+            <BrandMark surface="header" mode="light" />
+          </Box>
         </Box>
       </Container>
     </Box>

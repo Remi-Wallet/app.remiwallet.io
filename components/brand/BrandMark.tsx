@@ -1,3 +1,5 @@
+// components/brand/BrandMark.tsx
+
 "use client";
 
 import Link from "next/link";
@@ -29,6 +31,7 @@ export default function BrandMark({
   const { minWidth, idealHeight } = getBrandLogoDimensions({ surface });
 
   const showImage = Boolean(logoSrc) && !forceTextFallback;
+  const visualScale = surface === "appIcon" ? 1.02 : 1.04;
 
   return (
     <Box
@@ -41,9 +44,8 @@ export default function BrandMark({
         justifyContent: center ? "center" : "flex-start",
         textDecoration: "none",
         color: theme.palette.text.primary,
-
         minHeight: idealHeight,
-
+        lineHeight: 0,
         transition: `opacity ${t.motion.duration.normal}ms ${t.motion.easing.standard}`,
         "&:hover": {
           opacity: 0.82,
@@ -57,30 +59,12 @@ export default function BrandMark({
           alt={t.brand.name}
           sx={{
             display: "block",
-            height: idealHeight,
+            height: `${idealHeight}px`,
             width: "auto",
-            minWidth: minWidth,
-
+            minWidth: `${minWidth}px`,
             objectFit: "contain",
-
-            // optical scaling for perceived size
-            transform: "scale(1.04)",
+            transform: `scale(${visualScale})`,
             transformOrigin: "center",
-
-            // responsive upgrade
-            "@media (max-width:600px)": {
-              content: `url(${t.brand.assets.logo.icon[mode]})`,
-              height: t.brand.assets.logo.dimensions.header.idealHeight * 0.85,
-              minWidth: 28,
-            },
-
-            "@media (min-width:600px) and (max-width:960px)": {
-              content: `url(${t.brand.assets.logo.wordmark[mode]})`,
-            },
-
-            "@media (min-width:960px)": {
-              content: `url(${t.brand.assets.logo.fullLockup[mode]})`,
-            },
           }}
         />
       ) : (

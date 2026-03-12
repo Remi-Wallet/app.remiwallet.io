@@ -1,3 +1,5 @@
+// theme/tokens.ts
+
 export const tokens = {
   brand: {
     name: "Remi",
@@ -31,15 +33,17 @@ export const tokens = {
             idealHeight: 36,
             minWidth: 120,
           },
-
           footer: {
             idealHeight: 28,
             minWidth: 96,
           },
-
           marketing: {
             idealHeight: 42,
             minWidth: 140,
+          },
+          appIcon: {
+            idealHeight: 28,
+            minWidth: 28,
           },
         },
       },
@@ -116,26 +120,26 @@ export const tokens = {
           bg: "rgba(244,251,247,0.74)",
           border: "#E1EBE5",
           blurPx: 8,
-        }, 
-      footer: {
-        bg: "#EEF5F1",
-        subBg: "#E4EEE8",
-        text: "#5F746B",
-        subText: "#7A8D85",
-        link: "#3D7A67",
-        border: "#DDE8E2",
-        subBorder: "#D7E4DD",
+        },
+        footer: {
+          bg: "#EEF5F1",
+          subBg: "#E4EEE8",
+          text: "#5F746B",
+          subText: "#7A8D85",
+          link: "#3D7A67",
+          border: "#DDE8E2",
+          subBorder: "#D7E4DD",
+        },
       },
     },
   },
-},
 
   typography: {
     fontFamily: {
       sans:
-      'ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter, Arial, sans-serif',
+        'ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter, Arial, sans-serif',
       mono:
-      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     },
 
     weight: {
@@ -245,6 +249,6 @@ export const tokens = {
     modal: 1300,
     toast: 1400,
   },
-} as const ;
+} as const;
 
 export type Tokens = typeof tokens;
