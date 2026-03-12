@@ -55,17 +55,17 @@ export function QuizShell({
 
   const titleSx = isHero
     ? {
-        fontWeight: 800,
-        letterSpacing: "-0.02em",
-        lineHeight: 1.04,
-        fontSize: { xs: 34, sm: 50, md: 64 },
-      }
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      lineHeight: 1.04,
+      fontSize: { xs: 34, sm: 50, md: 64 },
+    }
     : {
-        fontWeight: 800,
-        letterSpacing: "-0.02em",
-        lineHeight: 1.06,
-        fontSize: { xs: 30, sm: 40, md: 46 },
-      };
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      lineHeight: 1.06,
+      fontSize: { xs: 30, sm: 40, md: 46 },
+    };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -108,7 +108,22 @@ export function QuizShell({
           {beforeTitle ? <Box sx={{ mb: 2 }}>{beforeTitle}</Box> : null}
 
           {title ? (
-            <Typography sx={titleSx} color="text.primary">
+            <Typography
+              color="text.primary"
+              sx={{
+                ...titleSx,
+
+                // hero anchor offset
+                transform: isHero ? "translateY(-6px)" : "none",
+
+                // improves readability for large headlines
+                maxWidth: isHero ? 720 : "100%",
+                mx: isHero ? "auto" : "initial",
+
+                // micro polish
+                lineHeight: isHero ? 1.02 : titleSx.lineHeight,
+              }}
+            >
               {title}
             </Typography>
           ) : null}
@@ -116,10 +131,15 @@ export function QuizShell({
           {subtitle ? (
             <Typography
               sx={{
-                mt: 1.25,
-                maxWidth: isHero ? 820 : 720,
+                mt: 1.5,
+
+                // keeps hero subtitle readable
+                maxWidth: isHero ? 560 : 720,
+                mx: isHero ? "auto" : "initial",
+
                 color: "text.secondary",
-                fontSize: { xs: 14.5, sm: 16 },
+                fontSize: { xs: 15, sm: 16 },
+
                 lineHeight: 1.6,
               }}
             >

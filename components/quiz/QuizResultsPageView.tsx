@@ -272,7 +272,7 @@ export default function QuizResultsPageView() {
       ? "Request Early Access"
       : tier === "B"
         ? "See If You Qualify"
-        : "Join Early Access";
+        : "Join Waitlist";
 
   const insightText =
     remiInsight && remiInsight.walletEfficiencyScore > 0

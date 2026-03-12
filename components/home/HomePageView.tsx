@@ -102,21 +102,17 @@ export default function HomePageView() {
   const router = useRouter();
 
   const onStart = async () => {
-    // Ensure local session and analytics context exist
     getOrCreateSessionId();
     trackOnce("quiz_start", { source: "landing" }, "quiz_start");
 
-    // Clear previous run state, but keep the browser session identity
     clearEventBuffer();
     clearResultsSnapshot();
     clearQuizAnswersKeepSession(false);
 
-    // Best effort: create backend session before quiz begins
     try {
       await ensureQuizSessionStarted();
     } catch (error) {
       console.error("Failed to start backend quiz session", error);
-      // okay to continue locally for now
     }
 
     router.push("/quiz/1");
@@ -129,81 +125,120 @@ export default function HomePageView() {
         display: "flex",
         justifyContent: "center",
         px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6, md: 7 },
+        py: { xs: 3.5, sm: 5.5, md: 6.5 },
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: 760,
+          maxWidth: 740,
+          mx: "auto",
+          position: "relative",
+          isolation: "isolate",
         }}
       >
-        <Typography
+        <Box
+          aria-hidden
           sx={(theme) => ({
-            fontWeight: 800,
-            letterSpacing: theme.typography.h4?.letterSpacing ?? "-0.025em",
-            color: theme.palette.text.primary,
-            fontSize: { xs: 38, sm: 52, md: 62 },
-            lineHeight: { xs: 1.06, sm: 1.05, md: 1.02 },
-            maxWidth: 760,
-            mb: 2,
-            textAlign: "left",
+            position: "absolute",
+            top: -32,
+            left: { xs: -24, sm: -40, md: -72 },
+            width: { xs: 320, sm: 420, md: 520 },
+            height: { xs: 220, sm: 280, md: 340 },
+            borderRadius: "50%",
+            zIndex: -1,
+            pointerEvents: "none",
+            background: `radial-gradient(
+              circle,
+              ${alpha(theme.palette.secondary.main, 0.16)} 0%,
+              ${alpha(theme.palette.primary.main, 0.08)} 35%,
+              rgba(255,255,255,0) 72%
+            )`,
+            filter: "blur(22px)",
+            opacity: 0.95,
           })}
+        />
+
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 620,
+            mx: "auto",
+            position: "relative",
+          }}
         >
-          You could be losing{" "}
-          <Box
-            component="span"
+          <Typography
             sx={(theme) => ({
-              color: theme.palette.secondary.main,
-              fontStyle: "italic",
+              fontWeight: 800,
+              letterSpacing: theme.typography.h4?.letterSpacing ?? "-0.025em",
+              color: theme.palette.text.primary,
+              fontSize: { xs: 38, sm: 52, md: 62 },
+              lineHeight: { xs: 1.04, sm: 1.03, md: 1.02 },
+              maxWidth: 600,
+              transform: "translateY(-6px)",
+              mb: 1.5,
+              textAlign: "left",
             })}
           >
-            thousands
-          </Box>{" "}
-          every year in
-          <Box component="br" sx={{ display: { xs: "none", sm: "block" } }} />
-          unclaimed rewards and offers.
-        </Typography>
+            You could be losing{" "}
+            <Box
+              component="span"
+              sx={(theme) => ({
+                color: theme.palette.secondary.main,
+                fontStyle: "italic",
+              })}
+            >
+              thousands
+            </Box>{" "}
+            every year in
+            <Box component="br" sx={{ display: { xs: "none", sm: "block" } }} />
+            unclaimed rewards and offers.
+          </Typography>
 
-        <Typography
-          sx={(theme) => ({
-            color: theme.palette.text.secondary,
-            fontSize: { xs: 18, sm: 20 },
-            lineHeight: 1.5,
-            maxWidth: 620,
-            mb: 3.5,
-            textAlign: "left",
-          })}
-        >
-          Take 60 seconds to see if you’re leaving value on the table.
-        </Typography>
+          <Typography
+            sx={(theme) => ({
+              color: theme.palette.text.secondary,
+              fontSize: { xs: 15.5, sm: 18, md: 20 },
+              lineHeight: 1.6,
+              maxWidth: 560,
+              mb: 2.75,
+              textAlign: "left",
+            })}
+          >
+            Take 60 seconds to see if you’re leaving value on the table.
+          </Typography>
 
-        <Box sx={{ width: "100%" }}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={onStart}
+          <Box
             sx={{
-              fontSize: "1rem",
-              fontWeight: 600,
-              "&:hover": { filter: "brightness(0.98)" },
-              "&:active": { transform: "translateY(1px)" },
+              width: "100%",
             }}
           >
-            See My Results
-          </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={onStart}
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 600,
+                "&:hover": { filter: "brightness(0.98)" },
+                "&:active": { transform: "translateY(1px)" },
+              }}
+            >
+              See My Results
+            </Button>
 
-          <ReassuranceText>
-            See your results before sharing any contact info.
-          </ReassuranceText>
+            <ReassuranceText>
+              See your results before sharing any contact info.
+            </ReassuranceText>
+          </Box>
 
           <Stack
             spacing={2.25}
             sx={{
-              mt: 3.5,
-              maxWidth: 620,
+              mt: 3.1,
+              width: "100%",
             }}
           >
             <ConfidenceItem
