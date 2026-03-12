@@ -3,7 +3,15 @@
 "use client";
 
 import * as React from "react";
-import { alpha, Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import {
+  alpha,
+  Box,
+  Button,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
@@ -30,20 +38,21 @@ function ConfidenceItem(props: {
       sx={{
         display: "flex",
         alignItems: "flex-start",
-        gap: 1.5,
-        p: 2,
+        gap: 1.25,
+        p: 1.5,
         height: "100%",
-        borderRadius: tokens.radius.md,
-        backgroundColor: tokens.color.semantic.bg.surface,
+        borderRadius: 3,
+        backgroundColor: "rgba(255,255,255,0.7)",
         border: `1px solid ${tokens.color.semantic.border.default}`,
-        boxShadow: tokens.shadow.sm,
+        boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
+        backdropFilter: "blur(6px)",
       }}
     >
       <Box
         sx={(theme) => ({
-          width: 28,
-          height: 28,
-          minWidth: 28,
+          width: 26,
+          height: 26,
+          minWidth: 26,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -53,7 +62,7 @@ function ConfidenceItem(props: {
           mt: "2px",
           boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
           "& .MuiSvgIcon-root": {
-            fontSize: 17,
+            fontSize: 16,
           },
         })}
       >
@@ -63,11 +72,11 @@ function ConfidenceItem(props: {
       <Box>
         <Typography
           sx={(theme) => ({
-            fontSize: { xs: "1rem", sm: "1.02rem" },
+            fontSize: { xs: "0.98rem", sm: "1rem" },
             fontWeight: 700,
             color: theme.palette.text.primary,
-            lineHeight: 1.35,
-            mb: 0.25,
+            lineHeight: 1.32,
+            mb: 0.2,
           })}
         >
           {props.title}
@@ -75,9 +84,9 @@ function ConfidenceItem(props: {
 
         <Typography
           sx={(theme) => ({
-            fontSize: { xs: "0.95rem", sm: "0.98rem" },
+            fontSize: { xs: "0.93rem", sm: "0.96rem" },
             color: theme.palette.text.secondary,
-            lineHeight: 1.62,
+            lineHeight: 1.52,
           })}
         >
           {props.body}
@@ -87,30 +96,91 @@ function ConfidenceItem(props: {
   );
 }
 
-function getTierContent(tier?: Tier, score?: number) {
+function ReassuranceText(props: { children: React.ReactNode }) {
+  return (
+    <Typography
+      sx={(theme) => ({
+        mt: 0.75,
+        textAlign: "center",
+        fontSize: "0.76rem",
+        color: theme.palette.text.secondary,
+        lineHeight: 1.35,
+        maxWidth: 420,
+        mx: "auto",
+        opacity: 0.88,
+      })}
+    >
+      {props.children}
+    </Typography>
+  );
+}
+
+function ProgressIndicator() {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        mb: 2.25,
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: "center",
+          color: "text.secondary",
+        }}
+      >
+        <Typography sx={{ fontSize: 13, fontWeight: 500 }}>Quiz</Typography>
+        <Typography sx={{ fontSize: 13 }}>✓</Typography>
+
+        <Typography sx={{ fontSize: 13, opacity: 0.45 }}>→</Typography>
+
+        <Typography sx={{ fontSize: 13, fontWeight: 500 }}>Results</Typography>
+        <Typography sx={{ fontSize: 13 }}>✓</Typography>
+
+        <Typography sx={{ fontSize: 13, opacity: 0.45 }}>→</Typography>
+
+        <Typography
+          sx={(theme) => ({
+            fontSize: 13,
+            fontWeight: 700,
+            color: theme.palette.text.primary,
+          })}
+        >
+          Early Access
+        </Typography>
+      </Stack>
+    </Box>
+  );
+}
+
+function getTierContent(tier?: Tier) {
   if (tier === "A") {
     return {
-      title: "You may qualify for early beta access",
+      title: "Request early access",
       subtitle:
-        "Based on your results, you appear to be a strong fit for early testing and higher-touch onboarding.",
+        "You appear to be a strong fit for early testing. Complete your request below.",
       calloutTitle: "Strong candidate for early beta",
       calloutBody:
-        "Your results suggest you may be a strong fit for our early beta group as we refine Remi with real users.",
-      confidenceItems: [
+        "Users with multi-card setups like yours often unlock significantly more value through better category coverage, card pairing, and redemption timing.",
+      ctaLabel: "Request Early Access",
+      benefits: [
         {
           icon: <AccessTimeOutlinedIcon />,
-          title: "Priority early access",
-          body: "Strong-fit users may receive invitations earlier as we expand onboarding.",
-        },
-        {
-          icon: <LockOutlinedIcon />,
-          title: "No credit card required",
-          body: "This signup is only for early access, product updates, and future invites.",
+          title: "Priority updates",
+          body: "We’ll notify you as higher-priority onboarding spots become available.",
         },
         {
           icon: <AutoAwesomeOutlinedIcon />,
-          title: "Higher-touch support",
-          body: "Some early adopters may receive more hands-on onboarding as we build the platform.",
+          title: "Early product access",
+          body: "Selected users may get earlier invitations as Remi rolls out in waves.",
+        },
+        {
+          icon: <LockOutlinedIcon />,
+          title: "Simple signup",
+          body: "No credit card or payment info is required for early access.",
         },
       ],
     };
@@ -118,53 +188,56 @@ function getTierContent(tier?: Tier, score?: number) {
 
   if (tier === "B") {
     return {
-      title: "You may qualify for early access",
+      title: "See if you qualify",
       subtitle:
-        "Based on your results, you may be a strong fit for early product access as we open onboarding more broadly.",
+        "You may be a strong fit for early access. Complete your request below.",
       calloutTitle: "Good fit for early access",
       calloutBody:
-        "Your results suggest you may be a strong fit for early access as we expand product testing and onboarding.",
-      confidenceItems: [
+        "Users with setups like yours can often capture more value with a few targeted changes and better category alignment.",
+      ctaLabel: "See If You Qualify",
+      benefits: [
         {
           icon: <AccessTimeOutlinedIcon />,
           title: "Early access updates",
-          body: "Join the list now and get product updates as early access opens.",
-        },
-        {
-          icon: <LockOutlinedIcon />,
-          title: "No credit card required",
-          body: "This signup is just for early access and product updates.",
+          body: "We’ll keep you posted as onboarding expands and access opens more broadly.",
         },
         {
           icon: <AutoAwesomeOutlinedIcon />,
-          title: "Potential beta invites",
-          body: "Some users may be invited into more guided onboarding as Remi evolves.",
+          title: "Potential beta invite",
+          body: "Some users may be invited into early product testing as Remi evolves.",
+        },
+        {
+          icon: <LockOutlinedIcon />,
+          title: "No payment info required",
+          body: "This signup is only for access updates, invitations, and product news.",
         },
       ],
     };
   }
 
   return {
-    title: "Get early access",
-    subtitle: "Get early access when Remi launches. No credit check. No card numbers required.",
-    calloutTitle: "Join the waitlist",
+    title: "Join the waitlist",
+    subtitle:
+      "Join the waitlist and we’ll keep you updated as early access expands.",
+    calloutTitle: "Stay in the loop",
     calloutBody:
-      "Join the list now to get updates, invitations, and product access as Remi continues to evolve.",
-    confidenceItems: [
+      "You’ll be first to hear about future access, product updates, and onboarding waves.",
+    ctaLabel: "Join Waitlist",
+    benefits: [
       {
         icon: <AccessTimeOutlinedIcon />,
-        title: "Free early access",
-        body: "Join the list now and get product updates as early access opens.",
-      },
-      {
-        icon: <LockOutlinedIcon />,
-        title: "No credit card required",
-        body: "This signup is just for early access and product updates.",
+        title: "Product updates",
+        body: "We’ll share progress and availability as early access opens over time.",
       },
       {
         icon: <AutoAwesomeOutlinedIcon />,
-        title: "Product invites",
-        body: "We’ll share early access invitations and updates as the platform evolves.",
+        title: "Future invitations",
+        body: "Waitlist users will hear first as new access waves become available.",
+      },
+      {
+        icon: <LockOutlinedIcon />,
+        title: "Quick, lightweight signup",
+        body: "No credit card or payment info is required to join the waitlist.",
       },
     ],
   };
@@ -183,7 +256,7 @@ export default function EarlyAccessPageView() {
   const tier = snapshot?.tier ?? quizState.tier;
   const score = snapshot?.score ?? 0;
 
-  const content = getTierContent(tier, score);
+  const content = getTierContent(tier);
   const isQualified = tier === "A" || tier === "B";
 
   React.useEffect(() => {
@@ -247,8 +320,8 @@ export default function EarlyAccessPageView() {
         title="You’re on the list."
         subtitle={
           isQualified
-            ? "We’ll reach out when early access opens and when we have higher-touch onboarding spots available."
-            : "We’ll reach out when early access opens and as product invitations become available."
+            ? "We’ll follow up as early access expands and onboarding spots become available."
+            : "We’ll keep you updated as new access waves and invitations become available."
         }
       >
         <Box sx={{ maxWidth: 620 }}>
@@ -256,10 +329,11 @@ export default function EarlyAccessPageView() {
             <Box
               sx={{
                 p: 2.25,
-                borderRadius: tokens.radius.md,
+                borderRadius: 3,
                 border: `1px solid ${tokens.color.semantic.border.default}`,
-                backgroundColor: tokens.color.semantic.bg.surface,
-                boxShadow: tokens.shadow.sm,
+                backgroundColor: "rgba(255,255,255,0.72)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.04)",
+                backdropFilter: "blur(6px)",
               }}
             >
               <Typography
@@ -269,7 +343,7 @@ export default function EarlyAccessPageView() {
                   color: tokens.color.semantic.text.secondary,
                 }}
               >
-                Thanks for joining early access. We’ll use your email to share product updates,
+                Thanks for signing up. We’ll use your email to share product updates,
                 invitations, and next steps as Remi evolves.
               </Typography>
             </Box>
@@ -284,19 +358,20 @@ export default function EarlyAccessPageView() {
   }
 
   return (
-    <QuizShell variant="quiz" title={content.title} subtitle={content.subtitle}>
+    <QuizShell variant="quiz" title={content.title} subtitle={content.subtitle} beforeTitle={<ProgressIndicator />}>
+
       <Box sx={{ width: "100%", maxWidth: 980 }}>
-        <Stack spacing={3}>
+        <Stack spacing={3.25}>
           {isQualified ? (
             <Box
               sx={(theme) => ({
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 1.5,
-                p: 2,
-                borderRadius: tokens.radius.md,
-                backgroundColor: alpha(theme.palette.secondary.main, 0.08),
-                border: `1px solid ${alpha(theme.palette.secondary.main, 0.24)}`,
+                p: 1.75,
+                borderRadius: 3,
+                backgroundColor: alpha(theme.palette.secondary.main, 0.06),
+                border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
               })}
             >
               <Box
@@ -353,6 +428,19 @@ export default function EarlyAccessPageView() {
                   maxWidth: { xs: "100%", md: 520 },
                 }}
               >
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "text.secondary",
+                    mb: -0.5,
+                  }}
+                >
+                  Complete your request
+                </Typography>
+
                 <TextField
                   fullWidth
                   label="Full name"
@@ -374,17 +462,6 @@ export default function EarlyAccessPageView() {
                   InputLabelProps={{ shrink: true }}
                 />
 
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                    lineHeight: 1.6,
-                    mt: -0.5,
-                  }}
-                >
-                  We’ll only use your email to send early access updates and product invitations.
-                </Typography>
-
                 <Button
                   fullWidth
                   variant="contained"
@@ -392,18 +469,23 @@ export default function EarlyAccessPageView() {
                   type="submit"
                   disabled={!canSubmit}
                   sx={{
-                    mt: 0.5,
+                    mt: 0.25,
                     minHeight: tokens.component.button.minHeight,
+                    fontWeight: 600,
                   }}
                 >
-                  {submitting ? "Submitting..." : "Request early access"}
+                  {submitting ? "Submitting..." : content.ctaLabel}
                 </Button>
+
+                <ReassuranceText>
+                  No credit card required for early access.
+                </ReassuranceText>
               </Box>
             </Grid>
 
             <Grid item xs={12} md={5}>
-              <Grid container spacing={2}>
-                {content.confidenceItems.map((item) => (
+              <Grid container spacing={1.5}>
+                {content.benefits.map((item) => (
                   <Grid item xs={12} sm={6} md={12} key={item.title}>
                     <ConfidenceItem
                       icon={item.icon}

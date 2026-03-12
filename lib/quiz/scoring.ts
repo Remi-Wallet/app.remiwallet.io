@@ -1,19 +1,40 @@
 // lib/quiz/scoring.ts
 
-import { CREDIT_CARDS } from "@/lib/cards/creditCards";
+import { CREDIT_CARDS, type CreditCard } from "@/lib/cards/creditCards";
 import type { Answers, Tier } from "./types";
+
+export type OpportunityBand = "low" | "moderate" | "high" | "very_high";
 
 export type RemiScoreBreakdown = {
   tierRoutingScore: number;
+  walletEfficiencyScore: number;
   opportunityScore: number;
   complexityScore: number;
   frictionScore: number;
+  ecosystemAlignmentScore: number;
+  annualFeeBurden: number;
   remiScore: number;
   estimatedValueNow: number;
   estimatedValueOptimized: number;
   estimatedValueFullyOptimized: number;
   estimatedGapOptimized: number;
   estimatedGapFullyOptimized: number;
+};
+
+export type ResultsProjection = {
+  currentValue: number;
+  optimizedValue: number;
+  fullyOptimizedValue: number;
+  gapLow: number;
+  gapHigh: number;
+  walletEfficiencyScore: number;
+  annualFeeBurden: number;
+  bars: Array<{
+    label: string;
+    value: number;
+    emphasis?: boolean;
+    amount: number;
+  }>;
 };
 
 function asString(value: unknown): string {
@@ -26,6 +47,151 @@ function asArray(value: unknown): string[] {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function round(value: number): number {
+  return Math.round(value);
+}
+
+function annualFeeAmount(card: CreditCard): number {
+  if (card.annualFee.type === "known") return card.annualFee.amount;
+  if (card.annualFee.type === "none") return 0;
+  return 0;
+}
+
+function effectiveAnnualFeeBurden(card: CreditCard): number {
+  const fee = annualFeeAmount(card);
+  if (!fee) return 0;
+
+  // v1 assumption:
+  // premium/flexible cards often have some perks/credits offsetting fee burden,
+  // but store/cobrand users usually realize less offset.
+  const isPremium = !!card.rewards?.isPremium;
+  const isTransferable = !!card.rewards?.isTransferableCurrency;
+
+  if (isPremium && isTransferable) return fee * 0.55;
+  if (isPremium) return fee * 0.65;
+  return fee * 0.8;
+}
+
+const CATEGORY_WEIGHTS: Record<string, number> = {
+  dining: 0.23,
+  groceries: 0.22,
+  travel: 0.2,
+  shopping: 0.14,
+  transit: 0.13,
+  other: 0.08,
+};
+
+const CATEGORY_ALIASES: Record<string, string[]> = {
+  dining: ["dining", "restaurants"],
+  groceries: ["groceries", "grocery", "supermarket", "supermarkets"],
+  travel: ["travel", "airfare", "flights", "hotels"],
+  shopping: ["shopping", "retail"],
+  transit: ["gas", "transit", "gas / transit", "transportation"],
+  other: ["other", "misc"],
+};
+
+function normalizeCategory(category: string): string {
+  return category.trim().toLowerCase();
+}
+
+function cardHasExplicitCoverage(card: CreditCard, category: string): boolean {
+  const normalized = normalizeCategory(category);
+  const aliases = CATEGORY_ALIASES[normalized] ?? [normalized];
+
+  const bonusMatches =
+    card.rewards?.bonusCategories?.some((entry) =>
+      aliases.includes(normalizeCategory(entry.category))
+    ) ?? false;
+
+  const tagMatches =
+    card.rewards?.tags?.some((tag) => aliases.includes(normalizeCategory(tag))) ?? false;
+
+  return bonusMatches || tagMatches;
+}
+
+function cardCoverageStrength(card: CreditCard, category: string): number {
+  const normalized = normalizeCategory(category);
+
+  if (cardHasExplicitCoverage(card, normalized)) return 1;
+
+  const role = card.rewards?.optimizationRole;
+  const cardCategory = card.category;
+
+  if (role === "catch_all") return 0.72;
+  if (role === "category") return 0.7;
+  if (role === "travel" && normalized === "travel") return 0.85;
+  if (role === "specialty" && ["dining", "travel"].includes(normalized)) return 0.68;
+  if (role === "store" && normalized === "shopping") return 0.45;
+
+  if (cardCategory === "Everyday") return 0.55;
+  if (cardCategory === "Cashback") return 0.5;
+  if (cardCategory === "Travel" && normalized === "travel") return 0.68;
+
+  return 0.28;
+}
+
+function bestCoverageForCategory(cards: CreditCard[], category: string): number {
+  if (!cards.length) return 0;
+  return cards.reduce((best, card) => {
+    return Math.max(best, cardCoverageStrength(card, category));
+  }, 0);
+}
+
+function getSelectedCards(answers: Answers): CreditCard[] {
+  const selectedIds = new Set([
+    ...asArray(answers.q_travel_cards),
+    ...asArray(answers.q_everyday_cards),
+  ]);
+
+  return CREDIT_CARDS.filter((card) => selectedIds.has(card.id));
+}
+
+function getWeightedCategoryCoverage(
+  selectedCards: CreditCard[],
+  spendCategories: string[]
+): { efficiency: number; mismatch: number } {
+  const categories = spendCategories.length ? spendCategories : ["other"];
+
+  const totalWeight = categories.reduce(
+    (sum, category) => sum + (CATEGORY_WEIGHTS[normalizeCategory(category)] ?? 0.1),
+    0
+  );
+
+  if (totalWeight <= 0) {
+    return { efficiency: 0.35, mismatch: 0.65 };
+  }
+
+  const weightedCoverage = categories.reduce((sum, category) => {
+    const weight = CATEGORY_WEIGHTS[normalizeCategory(category)] ?? 0.1;
+    const best = bestCoverageForCategory(selectedCards, category);
+    return sum + weight * best;
+  }, 0);
+
+  const efficiency = clamp(weightedCoverage / totalWeight, 0, 1);
+  return {
+    efficiency,
+    mismatch: clamp(1 - efficiency, 0, 1),
+  };
+}
+
+function getTransferableCards(cards: CreditCard[]): CreditCard[] {
+  return cards.filter((card) => !!card.rewards?.isTransferableCurrency);
+}
+
+function getEcosystemAlignment(cards: CreditCard[]): number {
+  const transferable = getTransferableCards(cards);
+  if (!transferable.length) return 0.15;
+
+  const counts = transferable.reduce<Record<string, number>>((acc, card) => {
+    const key = card.rewards?.ecosystem ?? "unknown";
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const maxCluster = Math.max(...Object.values(counts));
+  return clamp(maxCluster / transferable.length, 0, 1);
 }
 
 /**
@@ -73,9 +239,6 @@ export function computeTierFromAnswers(answers: Answers): Tier {
   return "C";
 }
 
-/**
- * Rough monthly spend midpoint for value estimation.
- */
 export function estimateMonthlySpend(answers: Answers): number {
   const spend = asString(answers.q_spend);
 
@@ -89,200 +252,170 @@ export function estimateMonthlySpend(answers: Answers): number {
   return spendMidpoints[spend] ?? 2000;
 }
 
+function getPotentialAnnualValueRate(
+  spendCategories: string[],
+  selectedCards: CreditCard[]
+): number {
+  let base = 0.012; // baseline annualized rewards/benefits capture potential
+
+  for (const raw of spendCategories) {
+    const category = normalizeCategory(raw);
+    if (category === "travel") base += 0.011;
+    else if (category === "dining") base += 0.006;
+    else if (category === "groceries") base += 0.006;
+    else if (category === "shopping") base += 0.004;
+    else if (category === "transit") base += 0.003;
+    else base += 0.002;
+  }
+
+  const transferableCount = getTransferableCards(selectedCards).length;
+  const premiumCount = selectedCards.filter((card) => card.rewards?.isPremium).length;
+
+  base += Math.min(transferableCount * 0.002, 0.006);
+  base += Math.min(premiumCount * 0.0015, 0.004);
+
+  return clamp(base, 0.012, 0.045);
+}
+
 export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
   const cards = asString(answers.q_cards);
   const feel = asString(answers.q_feel);
-  const spend = asString(answers.q_spend);
 
   const spendCategories = asArray(answers.q_spend_categories);
-  const travelCardIds = asArray(answers.q_travel_cards);
-  const everydayCardIds = asArray(answers.q_everyday_cards);
-
-  const selectedTravelCards = CREDIT_CARDS.filter((card) => travelCardIds.includes(card.id));
-  const selectedEverydayCards = CREDIT_CARDS.filter((card) => everydayCardIds.includes(card.id));
-  const selectedCards = [...selectedTravelCards, ...selectedEverydayCards];
-
+  const selectedCards = getSelectedCards(answers);
   const monthlySpend = estimateMonthlySpend(answers);
+  const annualSpend = monthlySpend * 12;
   const tierRoutingScore = computeTierScore(answers);
 
-  const transferableCount = selectedCards.filter(
-    (card) => card.rewards?.isTransferableCurrency
-  ).length;
+  const { efficiency, mismatch } = getWeightedCategoryCoverage(
+    selectedCards,
+    spendCategories
+  );
 
-  const premiumCount = selectedCards.filter(
-    (card) => card.rewards?.isPremium
-  ).length;
+  const walletEfficiencyScore = round(efficiency * 100);
 
-  const cobrandCount = selectedCards.filter(
-    (card) => card.rewards?.isCobrand
-  ).length;
+  const transferableCards = getTransferableCards(selectedCards);
+  const transferableCount = transferableCards.length;
+  const premiumCount = selectedCards.filter((card) => card.rewards?.isPremium).length;
+  const cobrandCount = selectedCards.filter((card) => card.rewards?.isCobrand).length;
+  const ecosystemAlignment = getEcosystemAlignment(selectedCards);
+  const ecosystemAlignmentScore = round(ecosystemAlignment * 100);
 
   const catchAllCount = selectedCards.filter(
     (card) => card.rewards?.optimizationRole === "catch_all"
   ).length;
 
-  const categoryRoleCount = selectedCards.filter(
-    (card) => card.rewards?.optimizationRole === "category"
-  ).length;
-
-  const travelRoleCount = selectedCards.filter(
-    (card) => card.rewards?.optimizationRole === "travel"
-  ).length;
-
-  const specialtyRoleCount = selectedCards.filter(
-    (card) => card.rewards?.optimizationRole === "specialty"
-  ).length;
-
-  const hasTravelCategory = spendCategories.includes("travel");
-  const hasDiningCategory = spendCategories.includes("dining");
-  const hasGroceriesCategory = spendCategories.includes("groceries");
-  const hasTransitCategory = spendCategories.includes("transit");
-  const hasShoppingCategory = spendCategories.includes("shopping");
-
-  // ---- Opportunity score (0–40) ----
-  const spendOpportunity: Record<string, number> = {
-    under_1k: 8,
-    "1_3k": 16,
-    "3_7k": 28,
-    "7k_plus": 36,
-  };
-
-  let categoryOpportunity = 0;
-  categoryOpportunity += Math.min(spendCategories.length * 2.5, 9);
-
-  if (hasTravelCategory) categoryOpportunity += 3;
-  if (hasDiningCategory) categoryOpportunity += 1.5;
-  if (hasGroceriesCategory) categoryOpportunity += 1.5;
-  if (hasTransitCategory) categoryOpportunity += 1;
-  if (hasShoppingCategory) categoryOpportunity += 1;
-
-  const cardCountOpportunity: Record<string, number> = {
-    "1": 4,
-    "2-3": 7,
-    "4-6": 10,
-    "7+": 12,
-  };
-
-  // More travel cards / transferable currencies imply more upside
-  const travelOpportunity =
-    Math.min(travelRoleCount * 2, 6) +
-    Math.min(transferableCount * 2.5, 6);
-
-  const opportunityScore = clamp(
-    (spendOpportunity[spend] ?? 16) +
-    categoryOpportunity +
-    (cardCountOpportunity[cards] ?? 6) +
-    travelOpportunity,
-    0,
-    40
-  );
-
-  // ---- Complexity score (0–30) ----
-  const cardComplexity: Record<string, number> = {
+  const cardsComplexityPoints: Record<string, number> = {
     "1": 4,
     "2-3": 10,
     "4-6": 18,
     "7+": 24,
   };
 
-  const roleComplexity =
-    Math.min(catchAllCount * 2, 4) +
-    Math.min(categoryRoleCount * 2, 6) +
-    Math.min(travelRoleCount * 2, 6) +
-    Math.min(specialtyRoleCount * 1.5, 3);
-
-  const ecosystemComplexity = Math.min(transferableCount * 2.5, 6);
-  const premiumComplexity = Math.min(premiumCount * 2, 4);
+  const opportunityScore = clamp(
+    round(
+      mismatch * 24 +
+        Math.min(spendCategories.length * 2, 8) +
+        Math.min(transferableCount * 2, 4) +
+        Math.min(premiumCount * 2, 4)
+    ),
+    0,
+    40
+  );
 
   const complexityScore = clamp(
-    (cardComplexity[cards] ?? 8) +
-    roleComplexity +
-    ecosystemComplexity +
-    premiumComplexity,
+    round(
+      (cardsComplexityPoints[cards] ?? 8) +
+        Math.min(transferableCount * 2, 4) +
+        Math.min(premiumCount * 1.5, 3) +
+        Math.min(cobrandCount, 3) +
+        ecosystemAlignment * 4
+    ),
     0,
     30
   );
 
-  // ---- Friction score (0–30) ----
   const feelFriction: Record<string, number> = {
-    handled: 6,
-    try_best: 14,
+    handled: 5,
+    try_best: 13,
     confusing: 24,
-    leaving_value: 20,
+    leaving_value: 21,
     dont_think: 18,
   };
 
-  const walletConfusionBonus =
-    (cards === "4-6" || cards === "7+") &&
-      (feel === "confusing" || feel === "leaving_value")
-      ? 4
-      : 0;
-
-  // A fragmented cobrand-heavy wallet can still indicate friction/opportunity
-  const cobrandFrictionBonus =
-    cobrandCount >= 2 && transferableCount === 0 ? 3 : 0;
-
   const frictionScore = clamp(
-    (feelFriction[feel] ?? 12) +
-    walletConfusionBonus +
-    cobrandFrictionBonus,
+    round(
+      (feelFriction[feel] ?? 12) +
+        ((cards === "4-6" || cards === "7+") &&
+        (feel === "confusing" || feel === "leaving_value")
+          ? 4
+          : 0) +
+        (cobrandCount >= 2 && transferableCount === 0 ? 3 : 0)
+    ),
     0,
     30
   );
 
-  // ---- Final score (0–100) ----
   const remiScore = clamp(
-    Math.round(opportunityScore + complexityScore + frictionScore),
+    round(opportunityScore + complexityScore + frictionScore),
     0,
     100
   );
 
-  // ---- Value estimation ----
-  // Current value = what they may already be capturing.
-  const currentCaptureRate: Record<string, number> = {
-    handled: 0.012,
-    try_best: 0.01,
-    confusing: 0.007,
-    leaving_value: 0.008,
-    dont_think: 0.006,
+  const annualFeeBurden = round(
+    selectedCards.reduce((sum, card) => sum + effectiveAnnualFeeBurden(card), 0)
+  );
+
+  const potentialAnnualValueRate = getPotentialAnnualValueRate(
+    spendCategories,
+    selectedCards
+  );
+
+  const confidenceAdjustment: Record<string, number> = {
+    handled: 0.92,
+    try_best: 0.82,
+    confusing: 0.66,
+    leaving_value: 0.72,
+    dont_think: 0.6,
   };
 
-  // Optimized = better card/category usage.
-  let optimizedBonusRate =
-    remiScore >= 75
-      ? 0.018
-      : remiScore >= 55
-        ? 0.014
-        : remiScore >= 35
-          ? 0.01
-          : 0.007;
-
-  // Transferable + premium + travel setups tend to have more upside.
-  optimizedBonusRate += Math.min(transferableCount * 0.002, 0.006);
-  optimizedBonusRate += Math.min(premiumCount * 0.0015, 0.003);
-
-  // Fully optimized = better redemptions / ecosystem strategy too.
-  let fullyOptimizedBonusRate =
-    remiScore >= 75
-      ? 0.028
-      : remiScore >= 55
-        ? 0.022
-        : remiScore >= 35
-          ? 0.016
-          : 0.011;
-
-  fullyOptimizedBonusRate += Math.min(transferableCount * 0.003, 0.009);
-  fullyOptimizedBonusRate += hasTravelCategory ? 0.003 : 0;
-  fullyOptimizedBonusRate += travelRoleCount > 0 ? 0.002 : 0;
-
-  const currentRate = currentCaptureRate[feel] ?? 0.008;
-
-  const estimatedValueNow = Math.round(monthlySpend * 12 * currentRate);
-  const estimatedValueOptimized = Math.round(
-    monthlySpend * 12 * (currentRate + optimizedBonusRate)
+  const currentEfficiency = clamp(
+    efficiency * (confidenceAdjustment[feel] ?? 0.75) +
+      Math.min(catchAllCount * 0.03, 0.08),
+    0.18,
+    0.78
   );
-  const estimatedValueFullyOptimized = Math.round(
-    monthlySpend * 12 * (currentRate + fullyOptimizedBonusRate)
+
+  const optimizedEfficiency = clamp(
+    efficiency +
+      mismatch * 0.48 +
+      0.08 +
+      Math.min(catchAllCount * 0.03, 0.06),
+    0.45,
+    0.88
+  );
+
+  const fullyOptimizedEfficiency = clamp(
+    optimizedEfficiency +
+      Math.min(transferableCount * 0.05, 0.15) +
+      ecosystemAlignment * 0.08 +
+      Math.min(premiumCount * 0.03, 0.06),
+    0.6,
+    0.95
+  );
+
+  const grossCurrent = annualSpend * potentialAnnualValueRate * currentEfficiency;
+  const grossOptimized =
+    annualSpend * potentialAnnualValueRate * optimizedEfficiency;
+  const grossFullyOptimized =
+    annualSpend * potentialAnnualValueRate * fullyOptimizedEfficiency;
+
+  const estimatedValueNow = round(Math.max(0, grossCurrent - annualFeeBurden));
+  const estimatedValueOptimized = round(
+    Math.max(0, grossOptimized - annualFeeBurden)
+  );
+  const estimatedValueFullyOptimized = round(
+    Math.max(0, grossFullyOptimized - annualFeeBurden)
   );
 
   const estimatedGapOptimized = Math.max(
@@ -296,9 +429,12 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
 
   return {
     tierRoutingScore,
+    walletEfficiencyScore,
     opportunityScore,
     complexityScore,
     frictionScore,
+    ecosystemAlignmentScore,
+    annualFeeBurden,
     remiScore,
     estimatedValueNow,
     estimatedValueOptimized,
@@ -307,8 +443,6 @@ export function calculateRemiScore(answers: Answers): RemiScoreBreakdown {
     estimatedGapFullyOptimized,
   };
 }
-
-export type OpportunityBand = "low" | "moderate" | "high" | "very_high";
 
 export function getOpportunityBand(remiScore: number): OpportunityBand {
   if (remiScore >= 75) return "very_high";
@@ -325,29 +459,24 @@ export function formatDollar(value: number): string {
   }).format(value);
 }
 
-export function getEstimatedRangeLabel(
-  estimatedGapOptimized: number,
-  estimatedGapFullyOptimized: number
-): string {
-  const low = Math.min(estimatedGapOptimized, estimatedGapFullyOptimized);
-  const high = Math.max(estimatedGapOptimized, estimatedGapFullyOptimized);
-
-  return `${formatDollar(low)}–${formatDollar(high)}/yr`;
+export function getProjectionRangeLabel(gapLow: number, gapHigh: number): string {
+  const low = Math.min(gapLow, gapHigh);
+  const high = Math.max(gapLow, gapHigh);
+  return `${formatDollar(low)}–${formatDollar(high)}`;
 }
 
-export type ResultsProjection = {
-  currentValue: number;
-  optimizedValue: number;
-  fullyOptimizedValue: number;
-  gapLow: number;
-  gapHigh: number;
-  bars: Array<{
-    label: string;
-    value: number;
-    emphasis?: boolean;
-    amount: number;
-  }>;
-};
+export function getRemiScoreSummary(answers: Answers) {
+  const breakdown = calculateRemiScore(answers);
+
+  return {
+    ...breakdown,
+    opportunityBand: getOpportunityBand(breakdown.remiScore),
+    estimatedRangeLabel: getProjectionRangeLabel(
+      breakdown.estimatedGapOptimized,
+      breakdown.estimatedGapFullyOptimized
+    ),
+  };
+}
 
 export function getResultsProjection(answers: Answers): ResultsProjection {
   const breakdown = calculateRemiScore(answers);
@@ -364,6 +493,8 @@ export function getResultsProjection(answers: Answers): ResultsProjection {
     fullyOptimizedValue,
     gapLow: breakdown.estimatedGapOptimized,
     gapHigh: breakdown.estimatedGapFullyOptimized,
+    walletEfficiencyScore: breakdown.walletEfficiencyScore,
+    annualFeeBurden: breakdown.annualFeeBurden,
     bars: [
       {
         label: "Current",
@@ -382,24 +513,5 @@ export function getResultsProjection(answers: Answers): ResultsProjection {
         amount: fullyOptimizedValue,
       },
     ],
-  };
-}
-
-export function getProjectionRangeLabel(gapLow: number, gapHigh: number): string {
-  const low = Math.min(gapLow, gapHigh);
-  const high = Math.max(gapLow, gapHigh);
-  return `${formatDollar(low)}–${formatDollar(high)}`;
-}
-
-export function getRemiScoreSummary(answers: Answers) {
-  const breakdown = calculateRemiScore(answers);
-
-  return {
-    ...breakdown,
-    opportunityBand: getOpportunityBand(breakdown.remiScore),
-    estimatedRangeLabel: getEstimatedRangeLabel(
-      breakdown.estimatedGapOptimized,
-      breakdown.estimatedGapFullyOptimized
-    ),
   };
 }

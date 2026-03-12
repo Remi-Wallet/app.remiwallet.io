@@ -15,6 +15,12 @@ export type QuizShellProps = {
   children: React.ReactNode;
 
   /**
+   * Optional content rendered inside the shell,
+   * above the title/subtitle block.
+   */
+  beforeTitle?: React.ReactNode;
+
+  /**
    * hero = landing/marketing headline styling
    * quiz = question-screen styling (Decision A: no-card, “on page” feel)
    */
@@ -38,6 +44,7 @@ export function QuizShell({
   title,
   subtitle,
   children,
+  beforeTitle,
   variant = "quiz",
   progress,
   showBack,
@@ -62,10 +69,7 @@ export function QuizShell({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <PageContainer
-        maxWidth={isHero ? 980 : 760}
-        py={{ xs: 3, sm: 5 }}
-      >
+      <PageContainer maxWidth={isHero ? 980 : 760} py={{ xs: 3, sm: 5 }}>
         <Box
           sx={{
             width: "100%",
@@ -100,6 +104,8 @@ export function QuizShell({
               <ProgressBar current={progress.current} total={progress.total} />
             </Box>
           ) : null}
+
+          {beforeTitle ? <Box sx={{ mb: 2 }}>{beforeTitle}</Box> : null}
 
           {title ? (
             <Typography sx={titleSx} color="text.primary">
